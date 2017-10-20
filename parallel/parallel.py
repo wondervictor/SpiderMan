@@ -4,4 +4,6 @@ from mpi4py import MPI
 
 
 
-def create_task(task)
+def create_task(task):
+
+    pass
