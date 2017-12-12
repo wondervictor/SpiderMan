@@ -99,3 +99,7 @@ ENV/
 
 # Mac
 .DS_Store
+
+# DB
+*.db
+*.txt
