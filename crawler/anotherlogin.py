@@ -49,8 +49,8 @@ headers['X-Requested-With'] = 'XMLHttpRequest'
 loginurl = 'https://www.zhihu.com/login/email'
 postdata = {
     '_xsrf': _xsrf[0],
-    'email': 'wonderstruclvictorz@hotmail.com',
-    'password': 'vic19961108',
+    'email': '***@qq.com',
+    'password': '***',
     'captcha_cn': 'cn'
 }
 loginresponse = session.post(url=loginurl, headers=headers, data=postdata)
