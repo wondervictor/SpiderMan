@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
+import re
 
 def GetHTML(url,keyword):
     try:
@@ -13,14 +14,16 @@ def GetHTML(url,keyword):
             r = requests.get(url,headers=head)
         r.raise_for_status()
         r.encoding = r.apparent_encoding
-        print(r.text)
+        session_token = re.findall(r'session_token=([0-9,a-z]{32})', r.text)[0]
+        auto = re.findall(r'carCompose&quot;:&quot;(.*?)&quot', r.text)[0]
+        print(session_token)
     except:
         print("faile")
 
 def main():
-    keyword = "Vic Chan"
-    url = "https://www.zhihu.com/search?"
-    #url = "https://www.zhihu.com/question/35855905/answer/261582944"
-    GetHTML(url,keyword)
+    #keyword = "Vic Chan"
+    #url = "https://www.zhihu.com/search?"
+    url = "https://www.zhihu.com/question/35855905/answer/261582944"
+    GetHTML(url,"")
 
 main()
