@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import cookielib
+import json
 import re
 import time
 import os.path
@@ -83,7 +84,8 @@ def login(secret, account):
         postdata = {
             '_xsrf': _xsrf,
             'phone_num': account,
-            'password': secret
+            'password': secret,
+            'captcha_cn': 'cn'
         }
     else:
         if "@" in account:
@@ -95,23 +97,24 @@ def login(secret, account):
         postdata = {
             '_xsrf': _xsrf,
             'email': account,
-            'password': secret
+            'password': secret,
+            'captcha_cn': 'cn'
         }
     # 不需要验证码直接登录成功
     loginresponse = session.post(url=post_url, headers=headers, data=postdata)
     loginresponse.encoding = loginresponse.apparent_encoding
     print('loginresponse', loginresponse.status_code)
-    # print(loginresponse.json())
-    # # 验证码问题输入导致失败: 猜测这个问题是由于session中对于验证码的请求过期导致
-    # if loginresponse.json()['r'] == 1:
-    #     # 不输入验证码登录失败
-    #     # 使用需要输入验证码的方式登录
-    #     postdata["captcha"] = get_captcha()
-    #     login_page = session.post(post_url, data=postdata, headers=headers)
-    #     login_code = login_page.json()
-    #     print(login_code['msg'])
-    # # 保存 cookies 到文件，
-    # # 下次可以使用 cookie 直接登录，不需要输入账号和密码
+    #print(loginresponse.json())
+    # 验证码问题输入导致失败: 猜测这个问题是由于session中对于验证码的请求过期导致
+    if loginresponse.json()['r'] == 1:
+        # 不输入验证码登录失败
+        # 使用需要输入验证码的方式登录
+        postdata["captcha"] = get_captcha()
+        login_page = session.post(post_url, data=postdata, headers=headers)
+        login_code = login_page.json()
+        print(login_code['msg'])
+    # 保存 cookies 到文件，
+    # 下次可以使用 cookie 直接登录，不需要输入账号和密码
     session.cookies.save()
 
 try:
