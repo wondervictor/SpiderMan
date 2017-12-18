@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import smthread
 
 
 class Worker(object):
