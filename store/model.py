@@ -52,3 +52,25 @@ class Answer(object):
 
         s = "[回答者]%s\n[日期]%s\n[内容]%s\n" % (self._user, self._date,self._content)
         return s
+
+
+class Topic(object):
+
+    def __init__(self, topic_id, content, url, questionids):
+
+        """
+
+        :param topic_id:  Topic ID
+        :param url: Topic URL
+        :param content: topic content
+        :param questions: question ids in Topic
+        """
+
+        self._id = topic_id
+        self._questions = questionids
+        self._url = url
+        self._content = content
+
+    def __call__(self, *args, **kwargs):
+        s = (self._id, self._content, self._url, self._questions)
+
