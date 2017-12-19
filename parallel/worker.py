@@ -86,13 +86,13 @@ class Worker(object):
 
         while True:
             try:
-                url = self.tasks.get(timeout=2)
+                url = self.tasks.get(timeout=1)
                 self.crawler_manager.do(url)
             except Queue.Empty:
                 print("URL queue is empty now ....")
 
             try:
-                content = self._content_queue.get(timeout=2)
+                content = self._content_queue.get(timeout=1)
                 self.parser_manager.do(content)
 
             except Queue.Empty:
