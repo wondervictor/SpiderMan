@@ -13,22 +13,24 @@ headers = {
     'Host': 'www.zhihu.com',
 }
 
-def GetHTML(url,keyword):
+
+def get_html(url, keyword=""):
     try:
-        #head = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'}
-        keyword = {'q':keyword}
+        # head = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'}
+
         url = url.split('/answer')[0]
         print(len(keyword))
-        if len(keyword)> 1:
-            r = requests.get(url,params= keyword, headers = headers)
+        if len(keyword) > 1:
+            keyword = {'q': keyword}
+            r = requests.get(url, params=keyword, headers=headers)
         else:
-            r = requests.get(url,headers=headers)
+            r = requests.get(url, headers=headers)
 
         r.raise_for_status()
         r.encoding = r.apparent_encoding
         # 需要提供运行机器上firefox执行地址
         # host添加127.0.0.1 localhost
-        driver = webdriver.PhantomJS()#Firefox()
+        driver = webdriver.PhantomJS() #Firefox()
         cookie = driver.get_cookies()
         driver.get(url)
         for i in range(2):
@@ -42,11 +44,11 @@ def GetHTML(url,keyword):
     except:
         print ("crawl failed")
 
-
-def main():
-    #keyword = "Vic Chan"
-    #url = "https://www.zhihu.com/search?"
-    url = "https://www.zhihu.com/question/35855905/answer/261582944"
-    GetHTML(url,"")
-
-main()
+#
+# def main():
+#     # keyword = "Vic Chan"
+#     # url = "https://www.zhihu.com/search?"
+#     url = "https://www.zhihu.com/question/35855905/answer/261582944"
+#     get_html(url,"")
+#
+# main()

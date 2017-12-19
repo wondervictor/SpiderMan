@@ -27,25 +27,20 @@ class Login(object):
         self._init_session()
 
     def _init_session(self):
-        self.session = requests.session()
-        self.session.cookies = cookielib.LWPCookieJar(filename='zhihucookie')
+        self._session = requests.session()
+        self._session.cookies = cookielib.LWPCookieJar(filename='zhihucookie')
         try:
-            self.session.cookies.load(ignore_discard=True)
+            self._session.cookies.load(ignore_discard=True)
         except :
             print('cookie 文件未能加载')
 
     def check(self):
 
-        try:
-            input = raw_input
-        except:
-            pass
-
         if self.is_login():
             print('您已经登录')
         else:
-            account = input('请输入你的用户名\n>  ')
-            secret = input("请输入你的密码\n>  ")
+            account = raw_input('请输入你的用户名\n>  ')
+            secret = raw_input("请输入你的密码\n>  ")
             self.login(secret, account)
 
 
@@ -67,7 +62,7 @@ class Login(object):
     def _get_captcha(self):
         t = str(int(time.time() * 1000))
         captcha_url = 'https://www.zhihu.com/captcha.gif?r=' + t + "&type=login"
-        r = self.session.get(captcha_url, headers=headers)
+        r = self._session.get(captcha_url, headers=headers)
         with open('captcha.jpg', 'wb') as f:
             f.write(r.content)
             f.close()
@@ -85,7 +80,7 @@ class Login(object):
     def is_login(self):
         # 通过查看用户个人信息来判断是否已经登录
         url = "https://www.zhihu.com/settings/profile"
-        login_code = self.session.get(url, headers=headers, allow_redirects=False).status_code
+        login_code = self._session.get(url, headers=headers, allow_redirects=False).status_code
         if login_code == 200:
             return True
         else:
@@ -119,7 +114,7 @@ class Login(object):
                 'captcha_cn': 'cn'
             }
         # 不需要验证码直接登录成功
-        loginresponse = self.session.post(url=post_url, headers=headers, data=postdata)
+        loginresponse = self._session.post(url=post_url, headers=headers, data=postdata)
         loginresponse.encoding = loginresponse.apparent_encoding
         print('loginresponse', loginresponse.status_code)
         # print(loginresponse.json())
@@ -128,15 +123,15 @@ class Login(object):
             # 不输入验证码登录失败
             # 使用需要输入验证码的方式登录
             postdata["captcha"] = self._get_captcha()
-            login_page = self.session.post(post_url, data=postdata, headers=headers)
+            login_page = self._session.post(post_url, data=postdata, headers=headers)
             login_code = login_page.json()
             print(login_code['msg'])
         # 保存 cookies 到文件，
         # 下次可以使用 cookie 直接登录，不需要输入账号和密码
-        self.session.cookies.save()
+        self._session.cookies.save()
 
 
-if __name__ == '__main__':
-
-    login = Login()
-    login.check()
+# if __name__ == '__main__':
+#
+#     login = Login()
+#     login.check()
