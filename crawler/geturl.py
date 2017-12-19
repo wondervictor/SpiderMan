@@ -14,7 +14,7 @@ headers = {
 }
 
 def GetHTML(url,keyword):
-    try:
+    # try:
         #head = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'}
         keyword = {'q':keyword}
         url = url.split('/answer')[0]
@@ -27,7 +27,7 @@ def GetHTML(url,keyword):
         r.raise_for_status()
         r.encoding = r.apparent_encoding
         #需要提供执行地址
-        driver = webdriver.Firefox(executable_path='')
+        driver = webdriver.Firefox()
         cookie = driver.get_cookies()
         driver.get(url)
         for i in range(10):
@@ -38,9 +38,9 @@ def GetHTML(url,keyword):
         # session_token = re.findall(r'session_token=([0-9,a-z]{32})', r.text)[0]
         # auto = re.findall(r'carCompose&quot;:&quot;(.*?)&quot', r.text)[0]
         # print(session_token)
-    except:
-        print ("crawl faile")
-
+    # except:
+    #     print ("crawl faile")
+    #
 
 def main():
     #keyword = "Vic Chan"
