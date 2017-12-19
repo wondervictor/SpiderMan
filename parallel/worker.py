@@ -3,7 +3,11 @@
 import multiprocessing
 import Queue
 from multiprocessing.managers import BaseManager
+import collections
 import smthread
+
+WorkerConfig = collections.namedtuple("WorkerConfig",
+                                      "task_batchsize, address, authkey, crawler_threads, parser_threads, name")
 
 
 class Master(object):
@@ -33,7 +37,7 @@ class Master(object):
 
 class Worker(object):
 
-    def __init__(self, config, crawler, parser):
+    def __init__(self, config, crawler_func, parser_func):
         """
         :param config: task_batchsize, address, authkey, crawler_threads, parser_threads, name
         :param crawler: crawler function
@@ -46,8 +50,8 @@ class Worker(object):
         self.tasks = None
         self.links = None
         self._content_queue = Queue.Queue()
-        self._crawler = crawler
-        self._parser = parser
+        self._crawler_func = crawler_func
+        self._parser_func = parser_func
         self._start()
         self._crawler_threads = config.crawler_threads
         self._parser_threads = config.parser_threads
@@ -58,7 +62,7 @@ class Worker(object):
         BaseManager.register('get_link_queue', callable=lambda: self.link_queue)
 
     def _crawl(self, args):
-        content = self._crawler(args)
+        content = self._crawler_func(args)
         self._content_queue.put(content)
 
     def _handle_content(self, content):
@@ -66,9 +70,12 @@ class Worker(object):
         # do something here
         pass
 
+    def _init_crawler(self):
+        pass
+
     def _parse(self, args):
 
-        links, content = self._parser(args)
+        links, content = self._parser_func(args)
         self.link_queue.put(links)
         self._handle_content(content)
 
