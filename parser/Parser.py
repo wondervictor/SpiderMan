@@ -496,10 +496,20 @@ class Topic:
                 comments.append(0)
         comments = [str(i) for i in comments]
 
+        return [kata, url, questions, names, simpletext, comments]
+
+    def total(self):
         title = self.gettitle()
+        kind = self.getinformation()[0]
+        url = self.getinformation()[1]
+        questions = self.getinformation()[2]
+        names = self.getinformation()[3]
+        simpletext = self.getinformation()[4]
+        comments = self.getinformation()[5]
+
         with codecs.open('Topic:'+title+'.txt', 'w', 'utf-8')as f:
             f.write(u'话题:\t\t'+title+'\n')
-            f.write(u'类型:\t\t'+kata+'\n')
+            f.write(u'类型:\t\t'+kind+'\n')
             for i in range(len(names)):
                 f.write('\n'+u'问题题目:\t'+questions[i]+'\n')
                 f.write(u'回答作者:\t'+names[i]+'\n')
@@ -542,12 +552,12 @@ class Topic:
 
 
 
-with open('/home/fan/people.txt', 'r')as f:
+with open('/home/fan/topic.txt', 'r')as f:
     datas = f.read()
 
 # Data = BS(datas, 'lxml').prettify()
 # with codecs.open('/home/fan/people0.txt', 'w', 'utf-8')as f:
 #     f.write(Data)
-hallo = People(datas).total()
+hallo = Topic(datas).total()
 print hallo
 
