@@ -22,7 +22,7 @@ class SMThread(threading.Thread):
 
 class SMThreadManager(object):
 
-    def __init__(self, max_threads=8):
+    def __init__(self, max_threads=8, func=None):
         """
         Init SMThreadManager
         :param max_threads: 最大线程数
@@ -30,6 +30,7 @@ class SMThreadManager(object):
         self.max_threads = max_threads
         self.task_queue = Queue.Queue()
         self.threads = []
+        self.func = func
         self._init_thread_pool()
 
     def _init_thread_pool(self):
@@ -50,23 +51,32 @@ class SMThreadManager(object):
         """
         self.task_queue.put((func, args))
 
+    def do(self, args):
+        """
+        重复任务
+        :param args: 参数 tuple
+        :return:
+        """
+        assert self.func is not None, "call `do` self.func shouldn't be None, please init it"
+        self.task_queue.put((self.func, args))
+
 
 def __test_thread_manager():
 
-    smt_manager = SMThreadManager()
-
     names = ['name_%s_%s' % (x, x) for x in range(100)]
 
-    def func(name):
+    def func_(name):
         print('hello %s' % name)
         sleep(2)
 
+    smt_manager = SMThreadManager(func=func_)
+
     for i in range(100):
-        smt_manager.add_task(func, names[i])
+        smt_manager.do(names[i])
 
     sleep(10)
 
 
-__test_thread_manager()
+# __test_thread_manager()
 
 
