@@ -26,9 +26,9 @@ def GetHTML(url,keyword):
 
         r.raise_for_status()
         r.encoding = r.apparent_encoding
-        #需要提供运行机器上firefox执行地址
-        #host添加127.0.0.1 localhost
-        driver = webdriver.Firefox()
+        # 需要提供运行机器上firefox执行地址
+        # host添加127.0.0.1 localhost
+        driver = webdriver.PhantomJS()#Firefox()
         cookie = driver.get_cookies()
         driver.get(url)
         for i in range(2):
@@ -40,7 +40,7 @@ def GetHTML(url,keyword):
         # auto = re.findall(r'carCompose&quot;:&quot;(.*?)&quot', r.text)[0]
         # print(session_token)
     except:
-        print ("crawl faile")
+        print ("crawl failed")
 
 
 def main():
