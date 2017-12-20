@@ -14,9 +14,8 @@ except:
 headers = {
     "Host": "www.zhihu.com",
     "Referer": "https://www.zhihu.com/",
-    "User-agent": 'Mozilla/5.0'
+    "User-agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
 }
-head = {'user-agent':'Mozilla/5.0'}
 
 # 使用登录cookie信息
 
@@ -48,7 +47,7 @@ class Login(object):
         '''_xsrf 是一个动态变化的参数'''
         index_url = 'https://www.zhihu.com/#signin'
         # 获取登录时需要用到的_xsrf
-        index_page = requests.get("https://www.zhihu.com/#signin", headers=head)
+        index_page = requests.get("https://www.zhihu.com/#signin", headers=headers)
         index_page.raise_for_status()
         index_page.encoding = index_page.apparent_encoding
         html = index_page.text
