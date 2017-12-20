@@ -73,7 +73,22 @@ class Login(object):
             im.close()
         except:
             print(u'请到 %s 目录找到captcha.jpg 手动输入' % os.path.abspath('captcha.jpg'))
-        captcha = raw_input("please input the captcha\n>")
+
+        sig = raw_input('验证码类型，字符1，倒立汉字2:')
+        if sig == '1':
+            captcha = raw_input('请输入验证码：')
+        else:
+            captcha = {
+                'img_size': [200, 44],
+                'input_points': [],
+            }
+            points = [[22.796875, 22], [42.796875, 22], [63.796875, 21], [84.796875, 20], [107.796875, 20],
+                      [129.796875, 22],
+                      [150.796875, 22]]
+            seq = raw_input('请输入倒立字的位置:')
+            for i in seq:
+                captcha['input_points'].append(points[int(i) - 1])
+            captcha = json.dumps(captcha)
         return captcha
 
     def is_login(self):
@@ -118,7 +133,7 @@ class Login(object):
         print('loginresponse', loginresponse.status_code)
         # print(loginresponse.json())
         # 验证码问题输入导致失败: 猜测这个问题是由于session中对于验证码的请求过期导致
-        if loginresponse.json()['r'] == 1:
+        while loginresponse.json()['r'] == 1:
             # 不输入验证码登录失败
             # 使用需要输入验证码的方式登录
             postdata["captcha"] = self._get_captcha()

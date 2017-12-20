@@ -2,8 +2,10 @@
 
 import requests
 from bs4 import BeautifulSoup
+import json
 import os, time
 import re
+import cookielib
 # import http.cookiejar as cookielib
 
 # 构造 Request headers
@@ -39,8 +41,23 @@ captcharesponse = session.get(url=captchaurl, headers=headers)
 with open('checkcode.gif', 'wb') as f:
     f.write(captcharesponse.content)
     f.close()
-# os.startfile('checkcode.gif')
-captcha = raw_input('请输入验证码：')
+os.startfile('checkcode.gif')
+
+sign = raw_input('验证码类型，字符1，倒立汉字2:')
+if sign == '1':
+    captcha = raw_input('请输入验证码：')
+else :
+    captcha = {
+        'img_size': [200, 44],
+        'input_points': [],
+    }
+    points = [[22.796875, 22], [42.796875, 22], [63.796875, 21], [84.796875, 20], [107.796875, 20], [129.796875, 22],
+              [150.796875, 22]]
+    seq = raw_input('请输入倒立字的位置:')
+    for i in seq:
+        captcha['input_points'].append(points[int(i) - 1])
+    captcha = json.dumps(captcha)
+
 print(captcha)
 
 ########### 开始登陆
@@ -49,32 +66,45 @@ headers['X-Requested-With'] = 'XMLHttpRequest'
 loginurl = 'https://www.zhihu.com/login/email'
 postdata = {
     '_xsrf': _xsrf[0],
-    'email': '***@qq.com',
-    'password': '***',
+    'email': 'wonderstruckvictor@hotmail.com',
+    'password': 'vic19961108',
     'captcha_cn': 'cn'
 }
 loginresponse = session.post(url=loginurl, headers=headers, data=postdata)
 print(loginresponse.status_code)
-# print(loginresponse.json())
+print(loginresponse.json())
 # 验证码问题输入导致失败: 猜测这个问题是由于session中对于验证码的请求过期导致
 
-# if loginresponse.json()['r']==1:
-#     # 重新输入验证码，再次运行代码则正常。也就是说可以再第一次不输入验证码，或者输入一个错误的验证码，只有第二次才是有效的
-#     randomtime = str(int(time.time() * 1000))
-#     captchaurl = 'https://www.zhihu.com/captcha.gif?r=' + \
-#                  randomtime + "&type=login"
-#     captcharesponse = session.get(url=captchaurl, headers=headers)
-#     with open('checkcode.gif', 'wb') as f:
-#         f.write(captcharesponse.content)
-#         f.close()
-#     os.startfile('checkcode.gif')
-#     captcha = input('请输入验证码：')
-#     print(captcha)
-#
-#     postdata['captcha'] = captcha
-#     loginresponse = session.post(url=loginurl, headers=headers, data=postdata)
-#     print('服务器端返回响应码：', loginresponse.status_code)
-#     print(loginresponse.json())
+while loginresponse.json()['r']==1:
+    # 重新输入验证码，再次运行代码则正常。也就是说可以再第一次不输入验证码，或者输入一个错误的验证码，只有第二次才是有效的
+    randomtime = str(int(time.time() * 1000))
+    captchaurl = 'https://www.zhihu.com/captcha.gif?r=' + \
+                 randomtime + "&type=login"
+    captcharesponse = session.get(url=captchaurl, headers=headers)
+    with open('checkcode.gif', 'wb') as f:
+        f.write(captcharesponse.content)
+        f.close()
+    os.startfile('checkcode.gif')
+    sig = raw_input('验证码类型，字符1，倒立汉字2:')
+    if sig == '1':
+        captcha = raw_input('请输入验证码：')
+    else:
+        captcha = {
+            'img_size': [200, 44],
+            'input_points': [],
+        }
+        points = [[22.796875, 22], [42.796875, 22], [63.796875, 21], [84.796875, 20], [107.796875, 20],
+                  [129.796875, 22],
+                  [150.796875, 22]]
+        seq = raw_input('请输入倒立字的位置:')
+        for i in seq:
+            captcha['input_points'].append(points[int(i) - 1])
+        captcha = json.dumps(captcha)
+    print(captcha)
+    postdata['captcha'] = captcha
+    loginresponse = session.post(url=loginurl, headers=headers, data=postdata)
+    print('服务器端返回响应码：', loginresponse.status_code)
+    print(loginresponse.json())
 
 
 
