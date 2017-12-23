@@ -3,6 +3,8 @@ import codecs
 from bs4 import BeautifulSoup as BS
 import re
 # 需要爬取问题本体，问题的提出者，浏览次数，点赞次数，答案，答案的作者，答案的评论，答案获得的点赞数
+# 通过判断url的后缀来判断调用的类的类型
+# 只需调用类的total函数，返回的是url的列表
 
 # re.compile(r'(http|https)://www.zhihu.com/search?.*?').match(url):
 
@@ -146,8 +148,8 @@ class Search:
                 f.write('\n'+u'回答标题:\t'+content[1][i]+'\n')
                 f.write(u'作者:\t\t'+content[2][i]+'\n')
                 f.write(u'回答简述:\t'+content[3][i]+'\n')
-                f.write(u'赞同数:\t'+content[4][i]+'\n')
-                f.write(u'评论数:\t'+content[5][i]+'\n')
+                f.write(u'赞同数:\t\t'+content[4][i]+'\n')
+                f.write(u'评论数:\t\t'+content[5][i]+'\n')
 
         return url
 
@@ -183,18 +185,18 @@ class Question:
 
         # 得到问题的关注数和浏览数
         information = self.clean(data.find(class_='QuestionFollowStatus-counts').text)
-        info = re.compile(u'.*?关注者([0-9]*)被浏览([0-9]*)').match(information)
+        info = re.compile(u'.*?关注者(.*?)被浏览([0-9]*)').match(information)
         if info:
             follows = info.group(1)
             views = info.group(2)
         else:
-            follows = 0
-            views = 0
+            follows = str(0)
+            views = str(0)
 
         # 得到问题的评论数
         comment = self.clean(data.find(class_='QuestionHeader-Comment').text.split(u'条')[0])
         if re.compile(u'.*?添加评论.*?').match(comment):
-            comment = 0
+            comment = str(0)
 
         # 得到问题的答案数
         # answer = self.clean(data.find(class_='List-headerText').text.split(u'个')[0])
@@ -208,15 +210,18 @@ class Question:
         sign = []
         # 得到答案的作者和签名
         for tag in data(class_='AuthorInfo-content'):
-            for name in tag(class_='UserLink-link'):
+            for name in tag(class_='UserLink'):
                 writer.append(self.clean(name.text))
-            for signs in tag(class_='AuthorInfo-badgeText'):
-                sign.append(self.clean(signs.text))
+                if(self.clean(name.text)==u'匿名用户'):
+                    sign.append(u'无')
+                else:
+                    for signs in tag(class_='AuthorInfo-badgeText'):
+                        sign.append(self.clean(signs.text))
 
         agree = []
         # 得到答案的赞同数
         for tag in data(class_='AnswerItem-extraInfo'):
-            agree.append(self.clean(tag.text.split(u'人')[0]))
+            agree.append(self.clean(tag.text).split(u'人')[0])
 
         content = []
         # 得到答案内容
@@ -258,8 +263,8 @@ class Question:
                 f.write('\n'+u'答者昵称:\t'+answer[0][i]+'\n')
                 f.write(u'答者标签:\t'+answer[1][i]+'\n')
                 f.write(u'答案内容:\t'+answer[2][i]+'\n')
-                f.write(u'赞同数:\t'+answer[3][i]+'\n')
-                f.write(u'评论数:\t'+answer[4][i]+'\n')
+                f.write(u'赞同数:\t\t'+answer[3][i]+'\n')
+                f.write(u'评论数:\t\t'+answer[4][i]+'\n')
 
         return url
 
@@ -291,7 +296,7 @@ class People:
 
         # 得到各种活动信息
         infor = self.clean(data.find(class_='ProfileMain-tabs').text)
-        ismatch = re.compile(u'.*?回答([0-9]*)提问([0-9]*)文章([0-9]*)专栏([0-9]*)想法([0-9]*).*?').match(infor)
+        ismatch = re.compile(u'.*?回答(.*?)提问(.*?)文章(.*?)专栏(.*?)想法([0-9]*).*?').match(infor)
         if ismatch:
             replynumber = ismatch.group(1)
             asknumber = ismatch.group(2)
@@ -299,11 +304,11 @@ class People:
             columnnumber = ismatch.group(4)
             thinknumber = ismatch.group(5)
         else:
-            replynumber = 0
-            asknumber = 0
-            articlenumber = 0
-            columnnumber = 0
-            thinknumber = 0
+            replynumber = str(0)
+            asknumber = str(0)
+            articlenumber = str(0)
+            columnnumber = str(0)
+            thinknumber = str(0)
 
         return [name, intro, tag, replynumber, asknumber, articlenumber, columnnumber, thinknumber]
 
@@ -312,10 +317,13 @@ class People:
         data = self.text
 
         act = []
-        for tag in data(class_='CopyrightRichText-richText'):
+        name = []
+        for tag in data(class_='ActivityItem-metaTitle'):
             act.append(self.clean(tag.text))
+        for tag in data(class_='ContentItem-title'):
+            name.append(self.clean(tag.text))
 
-        return act
+        return [act, name]
 
     # 得到成就信息
     def getachieve(self):
@@ -323,27 +331,27 @@ class People:
 
         # 赞同数，感谢数，收藏数，编辑数
         information = self.clean(data.find(class_='Profile-sideColumnItems').text)
-        ismatch = re.compile(u'.*?获得([0-9]*)次赞同获得([0-9]*)次感谢，([0-9]*)次收藏参与([0-9]*)次公共编辑.*?').match(information)
+        ismatch = re.compile(u'.*?获得(.*?)次赞同获得(.*?)次感谢，(.*?)次收藏参与(.*?)次公共编辑.*?').match(information)
         if ismatch:
             agree = ismatch.group(1)
             thanks = ismatch.group(2)
             collec = ismatch.group(3)
             edit = ismatch.group(4)
         else:
-            agree = 0
-            thanks = 0
-            collec = 0
-            edit = 0
+            agree = str(0)
+            thanks = str(0)
+            collec = str(0)
+            edit = str(0)
 
         # 关注数和被关注数
         attention = self.clean(data.find(class_='FollowshipCard-counts').text)
-        match = re.compile(u'.*?关注了([0-9]*)关注者([0-9]*).*?').match(attention)
+        match = re.compile(u'.*?关注了(.*?)关注者([0-9]*).*?').match(attention)
         if match:
             care = match.group(1)
             cared = match.group(2)
         else:
-            care = 0
-            cared = 0
+            care = str(0)
+            cared = str(0)
 
         return [agree, thanks, collec, edit, care, cared]
 
@@ -353,17 +361,17 @@ class People:
 
         # 关注的话题，专栏，问题，收藏夹
         information = self.clean(data.find(class_='Profile-lightList').text)
-        ismatch = re.compile(u'.*?关注的话题([0-9]*)关注的专栏([0-9]*)关注的问题([0-9]*)关注的收藏夹([0-9]*).*?').match(information)
+        ismatch = re.compile(u'.*?关注的话题(.*?)关注的专栏(.*?)关注的问题(.*?)关注的收藏夹([0-9]*).*?').match(information)
         if ismatch:
             topic = ismatch.group(1)
             column = ismatch.group(2)
             question = ismatch.group(3)
             collec = ismatch.group(4)
         else:
-            topic = 0
-            column = 0
-            question = 0
-            collec = 0
+            topic = str(0)
+            column = str(0)
+            question = str(0)
+            collec = str(0)
 
         return [topic, column, question, collec]
 
@@ -375,7 +383,6 @@ class People:
         for tag in data(itemprop='url'):
             url.append(tag['content'])
         return url
-
 
     # 汇总各种信息
     def total(self):
@@ -394,11 +401,11 @@ class People:
             f.write(u'人物昵称:\t'+information[0]+'\n')
             f.write(u'人物签名:\t'+information[1]+'\n')
             f.write(u'人物标签:\t'+information[2]+'\n')
-            f.write(u'回答数:\t'+information[3]+'\n')
-            f.write(u'提问数:\t'+information[4]+'\n')
-            f.write(u'文章数:\t'+information[5]+'\n')
-            f.write(u'专栏数:\t'+information[6]+'\n')
-            f.write(u'想法数:\t'+information[7]+'\n')
+            f.write(u'回答数:\t\t'+information[3]+'\n')
+            f.write(u'提问数:\t\t'+information[4]+'\n')
+            f.write(u'文章数:\t\t'+information[5]+'\n')
+            f.write(u'专栏数:\t\t'+information[6]+'\n')
+            f.write(u'想法数:\t\t'+information[7]+'\n')
             f.write('\n'+u'个人成就:'+'\n')
             f.write(u'总赞同数:\t'+achieve[0]+'\n')
             f.write(u'总感谢数:\t'+achieve[1]+'\n')
@@ -411,8 +418,9 @@ class People:
             f.write(u'专栏:\t\t'+care[1]+'\n')
             f.write(u'问题:\t\t'+care[2]+'\n')
             f.write(u'收藏夹:\t\t'+care[3]+'\n')
-            for i in range(len(activity)):
-                f.write('\n'+u'动态:\t\t'+activity[i]+'\n')
+            f.write('\n'+u'动态:'+'\n')
+            for i in range(len(activity[0])):
+                f.write(activity[0][i]+u':\t'+activity[1][i]+'\n')
 
         return url
 
@@ -452,9 +460,9 @@ class Topic:
         comments = []
         # 得到精华和等待回答页面
         for tag in data(class_='zm-topic-topbar'):
-            for jinghuahotanswers in tag(href=re.compile('top-answers')):
-                if jinghua:
-                    url.append('https://www.zhihu.com'+jinghua['href'])
+            for top in tag(href=re.compile('top-answers')):
+                if top:
+                    url.append('https://www.zhihu.com'+top['href'])
                     kata = u'热门问题'
             for active in tag(href=re.compile('hot')):
                 if active:
@@ -517,47 +525,4 @@ class Topic:
                 f.write(u'评论数:\t\t'+comments[i]+'\n')
 
         return url
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-with open('/home/fan/topic.txt', 'r')as f:
-    datas = f.read()
-
-# Data = BS(datas, 'lxml').prettify()
-# with codecs.open('/home/fan/people0.txt', 'w', 'utf-8')as f:
-#     f.write(Data)
-hallo = Topic(datas).total()
-print hallo
 
