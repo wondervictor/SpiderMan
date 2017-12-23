@@ -73,4 +73,4 @@ class Topic(object):
 
     def __call__(self, *args, **kwargs):
         s = (self._id, self._content, self._url, self._questions)
-
+        return s
