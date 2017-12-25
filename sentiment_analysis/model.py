@@ -6,9 +6,9 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 
-class CNNRNNClassifier(nn.Module):
-    def __init__(self, vocab_size, label_size):
-        super(CNNRNNClassifier, self).__init__()
+class SentimentNetwork(nn.Module):
+    def __init__(self, vocab_size, label_size=2):
+        super(SentimentNetwork, self).__init__()
 
         self.embedding = nn.Embedding(
             vocab_size, 256, padding_idx=0)
@@ -18,13 +18,13 @@ class CNNRNNClassifier(nn.Module):
         ])
         self.lstm = nn.LSTM(
             input_size=128,
-            hidden_size=128,
+            hidden_size=256,
             num_layers=2,
             dropout=0.5,
             bidirectional=False)
 
         self.dense = nn.Linear(
-            in_features=128, out_features=label_size)
+            in_features=256, out_features=label_size)
 
     def forward(self, entity_ids, seq_len):
         x = self.embedding(entity_ids)
@@ -38,19 +38,21 @@ class CNNRNNClassifier(nn.Module):
 
         out, _ = self.lstm(x.transpose(0, 1))
         last_output = out[-1, :, :]
-        logits = self.dense(last_output)
+        logits = F.softmax(self.dense(last_output))
 
         return logits
+
 
 def test():
 
     import numpy as np
     m = np.random.random_integers(0, 500, size=[4, 50])
-    p = CNNRNNClassifier(520, 2)
+    p = SentimentNetwork(520, 2)
     m = Variable(torch.LongTensor(m))
 
     s = p(m,30)
     print(s.size())
+
 
 
 
