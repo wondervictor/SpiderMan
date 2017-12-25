@@ -74,3 +74,12 @@ class Topic(object):
     def __call__(self, *args, **kwargs):
         s = (self._id, self._content, self._url, self._questions)
         return s
+
+
+class Person(object):
+
+    def __init__(self):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        pass

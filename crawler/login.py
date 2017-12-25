@@ -17,9 +17,8 @@ headers = {
     "User-agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
 }
 
+
 # 使用登录cookie信息
-
-
 class Login(object):
 
     def __init__(self):
@@ -30,7 +29,8 @@ class Login(object):
         self._session.cookies = cookielib.LWPCookieJar(filename='zhihucookie')
         try:
             self._session.cookies.load(ignore_discard=True)
-        except :
+        except:
+
             print('cookie 文件未能加载')
 
     def check(self):
@@ -42,9 +42,10 @@ class Login(object):
             secret = raw_input("请输入你的密码\n>  ")
             self.login(secret, account)
 
-
     def _get_xsrf(self):
-        '''_xsrf 是一个动态变化的参数'''
+        """
+        _xsrf 是一个动态变化的参数
+        """
         index_url = 'https://www.zhihu.com/#signin'
         # 获取登录时需要用到的_xsrf
         index_page = requests.get("https://www.zhihu.com/#signin", headers=headers)

@@ -6,9 +6,11 @@ import collections
 import multiprocessing
 from multiprocessing.managers import BaseManager
 
-from parallel import smthread
-from utils import url_check
 from common import log
+from parser import parser
+from utils import url_check
+from parallel import smthread
+from crawler import login, gethtml
 
 WorkerConfig = collections.namedtuple("WorkerConfig",
                                       "task_batchsize, address, authkey, crawler_threads, parser_threads, name")
@@ -80,6 +82,7 @@ class Worker(object):
         # self.task_queue = Queue.Queue()
         # self.link_queue = Queue.Queue()
         self._init_environment()
+        self.login = login.Login()
         self._manager = BaseManager(address=config.address, authkey=config.authkey)
         self.tasks = None
         self.links = None
@@ -117,10 +120,6 @@ class Worker(object):
         # do something here
         pass
 
-    def _init_crawler(self):
-
-        pass
-
     def _parse(self, args):
         """
         Parser线程解析函数，解析出content和url
@@ -145,6 +144,8 @@ class Worker(object):
         self.logger.info("Worker init")
 
     def run(self):
+        # 检查是否需要登录
+        self.login.check()
 
         while True:
             try:
@@ -175,13 +176,10 @@ def parse_func(p):
 
 def test_master():
 
-    master = Master(('0.0.0.0', 3389), AUTH_KEY)
+    master = Master(('0.0.0.0', 23333), AUTH_KEY)
     master.start(['hello', 'world', 'fwqrgfq', 'wgfq34g2', 'qfwef3qg3q', 'wqf3qgqgqq', 'fqwfgqg'])
     master.run()
 
-
-server_ip = '118.89.216.47'
-localhost = '0.0.0.0'
 
 def test_worker():
 
@@ -191,7 +189,7 @@ def test_worker():
         crawler_threads=2,
         parser_threads=4,
         authkey=AUTH_KEY,
-        address=(server_ip, 3389)
+        address=('0.0.0.0', 23333)
     )
 
     worker = Worker(config=config, crawler_func=crawl_func, parser_func=parse_func)
@@ -199,16 +197,16 @@ def test_worker():
     worker.run()
 
 
-if __name__ == '__main__':
-    multiprocessing.current_process().authkey = AUTH_KEY
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--worker', type=int, default=1, help='worker node')
-
-    args = parser.parse_args()
-
-    if args.worker == 1:
-        test_worker()
-    else:
-        test_master()
+# if __name__ == '__main__':
+#     multiprocessing.current_process().authkey = AUTH_KEY
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--worker', type=int, default=1, help='worker node')
+#
+#     args = parser.parse_args()
+#
+#     if args.worker == 1:
+#         test_worker()
+#     else:
+#         test_master()
 
 

@@ -29,7 +29,10 @@ def time_to_str(timestamp):
 
 
 def check_system():
-
+    """
+    检查系统
+    :return:
+    """
     if sys.platform == 'darwin':
         return 'macOS'
     elif sys.platform == 'linux2':

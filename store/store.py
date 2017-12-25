@@ -4,7 +4,7 @@
 
 Store data in the Sqlite3 Database
 
-|id|问题|提问者|日期|URL|
+Table1
 
 
 

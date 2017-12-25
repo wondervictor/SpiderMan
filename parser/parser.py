@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
+import re
 import codecs
 from bs4 import BeautifulSoup as BS
-import re
+
 # 需要爬取问题本体，问题的提出者，浏览次数，点赞次数，答案，答案的作者，答案的评论，答案获得的点赞数
 # 通过判断url的后缀来判断调用的类的类型
 # 只需调用类的total函数，返回的是url的列表
@@ -212,7 +213,7 @@ class Question:
         for tag in data(class_='AuthorInfo-content'):
             for name in tag(class_='UserLink'):
                 writer.append(self.clean(name.text))
-                if(self.clean(name.text)==u'匿名用户'):
+                if self.clean(name.text) == u'匿名用户':
                     sign.append(u'无')
                 else:
                     for signs in tag(class_='AuthorInfo-badgeText'):
@@ -526,3 +527,27 @@ class Topic:
 
         return url
 
+
+def parse_html(content_type, content):
+
+    if content_type == 'search':
+        # 搜索
+        parser = Search(content)
+        urls = parser.total()
+
+    elif content_type == 'question':
+        # 问题
+        parser = Question(content)
+        urls = parser.total()
+
+    elif content_type == 'people':
+        # 用户
+        parser = People(content)
+        urls = parser.total()
+
+    elif content_type == 'topic':
+        # 主题
+        parser = Topic(content)
+        urls = parser.total()
+
+    return urls
