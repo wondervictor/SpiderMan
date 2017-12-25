@@ -13,7 +13,7 @@ from common import log
 WorkerConfig = collections.namedtuple("WorkerConfig",
                                       "task_batchsize, address, authkey, crawler_threads, parser_threads, name")
 
-AUTH_KEY = "dasfbq3G^%ERFSTYIVI*&R^F &#^C"
+AUTH_KEY = 'abc'
 
 
 class Master(object):
@@ -29,7 +29,6 @@ class Master(object):
         self.link_queue = Queue.Queue()
         self._init_environment()
         self.manager = BaseManager(address=address, authkey=authkey)
-        multiprocessing.current_process().authkey = config.authkey
         self.tasks = None
         self.links = None
 
@@ -75,7 +74,6 @@ class Worker(object):
         :param crawler: crawler function
         :param parser: parser function
         """
-
         # log
         self.logger = log.Logger('Worker')
 
@@ -84,7 +82,6 @@ class Worker(object):
         self._init_environment()
         self._manager = BaseManager(address=config.address, authkey=config.authkey)
         self.tasks = None
-        multiprocessing.current_process().authkey = config.authkey
         self.links = None
         self._content_queue = Queue.Queue()
         self._crawler_func = crawler_func
@@ -141,6 +138,7 @@ class Worker(object):
         self.parser_manager = smthread.SMThreadManager(max_threads=self._parser_threads, func=self._parse)
 
     def _start(self):
+        multiprocessing.current_process().authkey = AUTH_KEY
         self._manager.connect()
         self.tasks = self._manager.get_task_queue()
         self.links = self._manager.get_link_queue()
@@ -177,10 +175,13 @@ def parse_func(p):
 
 def test_master():
 
-    master = Master(('0.0.0.0', 23333), AUTH_KEY)
+    master = Master(('0.0.0.0', 3389), AUTH_KEY)
     master.start(['hello', 'world', 'fwqrgfq', 'wgfq34g2', 'qfwef3qg3q', 'wqf3qgqgqq', 'fqwfgqg'])
     master.run()
 
+
+server_ip = '118.89.216.47'
+localhost = '0.0.0.0'
 
 def test_worker():
 
@@ -190,7 +191,7 @@ def test_worker():
         crawler_threads=2,
         parser_threads=4,
         authkey=AUTH_KEY,
-        address=('118.89.216.47', 23333)
+        address=(server_ip, 3389)
     )
 
     worker = Worker(config=config, crawler_func=crawl_func, parser_func=parse_func)
@@ -199,7 +200,7 @@ def test_worker():
 
 
 if __name__ == '__main__':
-
+    multiprocessing.current_process().authkey = AUTH_KEY
     parser = argparse.ArgumentParser()
     parser.add_argument('--worker', type=int, default=1, help='worker node')
 

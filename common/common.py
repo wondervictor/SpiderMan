@@ -5,7 +5,7 @@ Common Functions
 
 """
 
-
+import sys
 import time
 import datetime
 
@@ -26,3 +26,13 @@ def time_to_str(timestamp):
     """
     return datetime.datetime.\
         fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def check_system():
+
+    if sys.platform == 'darwin':
+        return 'macOS'
+    elif sys.platform == 'linux2':
+        return 'linux'
+    else:
+        return 'windows'
