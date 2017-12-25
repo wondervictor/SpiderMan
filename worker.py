@@ -29,6 +29,7 @@ class Master(object):
         self.link_queue = Queue.Queue()
         self._init_environment()
         self.manager = BaseManager(address=address, authkey=authkey)
+        multiprocessing.current_process().authkey = config.authkey
         self.tasks = None
         self.links = None
 
@@ -83,6 +84,7 @@ class Worker(object):
         self._init_environment()
         self._manager = BaseManager(address=config.address, authkey=config.authkey)
         self.tasks = None
+        multiprocessing.current_process().authkey = config.authkey
         self.links = None
         self._content_queue = Queue.Queue()
         self._crawler_func = crawler_func
@@ -188,7 +190,7 @@ def test_worker():
         crawler_threads=2,
         parser_threads=4,
         authkey=AUTH_KEY,
-        address=('0.0.0.0', 23333)
+        address=('118.89.216.47', 23333)
     )
 
     worker = Worker(config=config, crawler_func=crawl_func, parser_func=parse_func)
