@@ -1,6 +1,5 @@
 # coding:utf-8
 import os
-os.environ['KERAS_BACKEND']='theano'
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential,load_model
 from keras.layers import Convolution2D, MaxPooling2D
