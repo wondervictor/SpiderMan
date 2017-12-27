@@ -37,22 +37,22 @@ def get_html(url, keyword=""):
         else:
             exec_path = './phantomjs/phantomjs.exe'
         driver = webdriver.PhantomJS(exec_path)  # Firefox()
-        cookie = driver.get_cookies()
-        if len(cookie) > 0:
-
-            driver.add_cookie(cookie)
+        # cookie = driver.get_cookies()
+        # if len(cookie) > 0:
+        #     driver.add_cookie(cookie)
         driver.get(url)
         time.sleep(0.5)
         for i in range(2):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)
         html = driver.page_source
-        print (html)
+        return html
         # session_token = re.findall(r'session_token=([0-9,a-z]{32})', r.text)[0]
         # auto = re.findall(r'carCompose&quot;:&quot;(.*?)&quot', r.text)[0]
         # print(session_token)
     except:
-        print ("crawl failed")
+
+        return ""
 
 
 def main():
@@ -63,5 +63,6 @@ def main():
     # url = "https://www.zhihu.com/search?"
     url = "https://www.zhihu.com/question/65483475"
     get_html(url,"")
+
 
 main()

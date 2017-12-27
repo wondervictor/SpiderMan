@@ -19,11 +19,6 @@ WorkerConfig = collections.namedtuple("WorkerConfig",
 AUTH_KEY = 'abc'
 
 
-class Task(object):
-
-    pass
-
-
 class Master(object):
 
     def __init__(self, address, authkey):
@@ -107,6 +102,7 @@ class Worker(object):
         :return:
         """
         content = self._crawler_func(url)
+        if content
         self._content_queue.put((url, content))
         print("Crawler: args: %s get: %s" % (url, content))
 
@@ -166,12 +162,11 @@ class Worker(object):
 # Test Distributed
 
 def crawl_func(s):
-    return "%s + content" % s
+    return gethtml.get_html(s)
 
+def parse_func(content_type, content):
 
-def parse_func(p):
-
-    return ["%s-%d" % (p, x) for x in range(2)], "content"
+    return parser.parse_html(content_type, content)
 
 
 def test_master():
