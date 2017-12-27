@@ -7,6 +7,7 @@ import multiprocessing
 from multiprocessing.managers import BaseManager
 
 from common import log
+from store import store
 from parser import parser
 from utils import url_check
 from parallel import smthread
@@ -20,7 +21,7 @@ AUTH_KEY = 'abc'
 
 class Task(object):
 
-
+    pass
 
 
 class Master(object):
@@ -61,7 +62,6 @@ class Master(object):
         :return:
         """
         while True:
-
             try:
                 urls = self.links.get(timeout=2)
                 # urls = url_check.check_urls(urls, self.checker)
@@ -76,11 +76,7 @@ class Master(object):
 class Worker(object):
 
     def __init__(self, config, crawler_func, parser_func):
-        """
-        :param config: task_batchsize, address, authkey, crawler_threads, parser_threads, name
-        :param crawler: crawler function
-        :param parser: parser function
-        """
+
         # log
         self.logger = log.Logger('Worker')
 
@@ -111,19 +107,16 @@ class Worker(object):
         :return:
         """
         content = self._crawler_func(url)
-        self._content_queue.put(content)
+        self._content_queue.put((url, content))
         print("Crawler: args: %s get: %s" % (url, content))
 
-    def _handle_content(self, content):
+    def _handle_content(self, content, content_type):
         """
         处理解析出来的content
         :param content:
         :return:
         """
-        # DEBUG
-        print(content)
-        # do something here
-        pass
+        store.save_file(content_type, content)
 
     def _parse(self, args):
         """
@@ -131,10 +124,12 @@ class Worker(object):
         :param args:
         :return:
         """
-        links, content = self._parser_func(args)
+        url, content = args
+        content_type = url_check.get_url_type(url)
+        content_type, links, content = self._parser_func(content_type, content)
         self.links.put(links)
         print(self.links.qsize())
-        self._handle_content(content)
+        self._handle_content(content, content_type)
 
     def _init_threads(self):
 
@@ -161,8 +156,8 @@ class Worker(object):
                 print("URL queue is empty now ....")
 
             try:
-                content = self._content_queue.get(timeout=1)
-                self.parser_manager.do(content)
+                url_, content = self._content_queue.get(timeout=1)
+                self.parser_manager.do((url_, content))
 
             except Queue.Empty:
                 print("Worker content queue is empty now ...")
