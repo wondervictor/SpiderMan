@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import time
-import cookielib
+import os
+import sys
+sys.path.append('../')
+from common import common
 import requests
 from selenium import webdriver
 
@@ -32,7 +35,11 @@ def get_html(url, keyword=""):
         service_args.append('--load-images=no')
         # 开启缓存
         service_args.append('--disk-cache=yes')
-        driver = webdriver.PhantomJS(service_args=service_args)
+        if common.check_system() == 'macOS':
+            exec_path = './phantomjs/phantomjs'
+        else:
+            exec_path = './phantomjs/phantomjs.exe'
+        driver = webdriver.PhantomJS(exec_path,service_args=service_args)
         # # 设置超时时间
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
