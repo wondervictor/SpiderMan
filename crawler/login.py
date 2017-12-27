@@ -5,6 +5,7 @@ import json
 import re
 import time
 import os.path
+# from bs4 import BeautifulSoup
 try:
     from PIL import Image
 except:
@@ -96,6 +97,9 @@ class Login(object):
         # 通过查看用户个人信息来判断是否已经登录
         url = "https://www.zhihu.com/settings/profile"
         login_code = self._session.get(url, headers=headers, allow_redirects=False).status_code
+        # profileresponse = self._session.get(url, headers=headers, allow_redirects=False)
+        # profilesoup = BeautifulSoup(profileresponse.text, 'html.parser')
+        # print (profileresponse.text)
         if login_code == 200:
             return True
         else:
@@ -146,7 +150,7 @@ class Login(object):
         self._session.cookies.save()
 
 
-# if __name__ == '__main__':
-#
-#     login = Login()
-#     login.check()
+if __name__ == '__main__':
+
+    login = Login()
+    login.check()
