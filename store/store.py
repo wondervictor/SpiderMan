@@ -20,6 +20,7 @@ DB_PATH = 'spiderman.db'
 
 logger = log.Logger(name='store')
 
+
 def init_all_dbs():
     """
     call it when creating database
@@ -53,29 +54,6 @@ def store_new_question(question):
     cursor = conn.cursor()
     sql = "INSERT into Question (id, content, user, date) VALUES (%s, %s, %s, %s)" % question()
     cursor.execute(sql)
-    conn.commit()
-    conn.close()
-
-
-def store_answers(ques_id, answers):
-    """
-    :param ques_id: 问题ID
-    :param answers: 回答
-    :type answers: [Answer] list object
-    :return:
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    def part(answer):
-        assert isinstance(answer, Answer), "param `answer` should be model.Answer's instance"
-        sql = "INSERT into Answer (id, question_id, content, user, date) VALUES (%s, %s, %s, %s, %s)" % answer()
-        cursor.execute(sql)
-
-    for answer in answers:
-
-        part(answer)
-
     conn.commit()
     conn.close()
 
@@ -148,11 +126,11 @@ def save_file(dir_path, content_type, content):
         content format: {id:id/name, answers:[]}
         """
 
-        assert isinstance(content, dict), "use Dict: {id:id/name, url:url, content: content, answers:[AnswerObjects]}"
+        assert isinstance(content, dict), "use Dict: {filename:xx, url:url, content: content, answers:[AnswerObjects]}"
 
         if dir_path[-1] != '/':
             dir_path += '/'
-        path = dir_path + 'question_answer_%s.txt' % content['id']
+        path = dir_path + content['filename']
 
         with open(path, 'w+') as f:
 
