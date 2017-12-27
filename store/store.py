@@ -9,11 +9,12 @@ Table1
 
 
 """
-
+import os
+import sys
 import sqlite3
-from common import log
 
-from model import Question, Answer
+from common import log
+from model import Question, Answer, Person, Topic
 
 DB_PATH = 'spiderman.db'
 
@@ -29,7 +30,7 @@ def init_all_dbs():
     cursor = conn.cursor()
     exec_sql = "create table Question (id INTEGER primary key, content text, user VARCHAR(20), date VARCHAR(30))"
     cursor.execute(exec_sql)
-    exec_sql = "create table Answer (id INTEGER primary key, question_id INTEGER, content text, user VARCHAR(20), date VARCHAR(30))"
+    exec_sql = "create table People (id INTEGER primary key, question_id INTEGER, content text, user VARCHAR(20), date VARCHAR(30))"
     cursor.execute(exec_sql)
     conn.commit()
     conn.close()
@@ -57,37 +58,121 @@ def store_new_question(question):
     conn.close()
 
 
-def store_answers(ques_id, answers):
-    """
-    :param ques_id: 问题ID
-    :param answers: 回答
-    :type answers: [Answer] list object
-    :return:
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+def init_people_file(directory):
 
-    def part(answer):
-        assert isinstance(answer, Answer), "param `answer` should be model.Answer's instance"
-        sql = "INSERT into Answer (id, question_id, content, user, date) VALUES (%s, %s, %s, %s, %s)" % answer()
-        cursor.execute(sql)
+    if directory[-1] != '/':
+        directory += '/'
+    path = directory + 'people.csv'
 
-    for answer in answers:
+    if not os.path.exists(path):
 
-        part(answer)
+        columns = [u'人物昵称', u'人物签名', u'人物标签', u'回答数', u'提问数', u'文章数', u'专栏数', u'想法数',
+                   u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
+                   u'关注问题', u'收藏夹', u'动态']
+        with open(path, 'w+') as f:
+            line = ','.join(columns)
+            line += '\n'
+            f.write(line)
 
-    conn.commit()
-    conn.close()
+        logger.info("Created people information file: %s" % path)
+    return path
 
 
-def __test__question():
+def init_question_file(directory):
 
-    pass
+    if directory[-1] != '/':
+        directory += '/'
+    path = directory + 'question.csv'
+
+    if not os.path.exists(path):
+
+        columns = ['问题ID', '问题标题', '问题描述', '问题关注数', '问题浏览数', '问题评论数', 'URL', '回答文件']
+
+        with open(path, 'w+') as f:
+            line = ','.join(columns)
+            line += '\n'
+            f.write(line)
+
+        logger.info("Created question information file: %s" % path)
+    return path
 
 
-def __test__answer():
+def save_file(dir_path, content_type, content):
 
-    pass
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+
+    if content_type == 'people':
+        # 存储用户信息 -- csv
+        path = init_people_file(dir_path)
+        assert isinstance(content, Person), "use Person class instead of raw content"
+        with open(path, 'w+') as f:
+            f.write(content.to_csv_line())
+            f.write('\n')
+        logger.info('people saved!')
+
+    elif content_type == 'question':
+        # 存储问题信息 -- csv
+        path = init_question_file(dir_path)
+        assert isinstance(content, Question), "use Question class instead of raw content"
+        with open(path, 'w+') as f:
+            f.write(content.to_csv_line())
+            f.write('\n')
+        logger.info('question saved')
+
+    elif content_type == 'answers':
+
+        """
+        content format: {id:id/name, answers:[]}
+        """
+
+        assert isinstance(content, dict), "use Dict: {filename:xx, url:url, content: content, answers:[AnswerObjects]}"
+
+        if dir_path[-1] != '/':
+            dir_path += '/'
+        path = dir_path + content['filename']
+
+        with open(path, 'w+') as f:
+
+            f.write('[Question]:%s\n' % content['content'])
+            f.write('[URL]:%s\n' % content['url'])
+
+            answers = content['answers']
+            for ans in answers:
+                f.write(ans)
+
+        logger.info("answers saved")
+
+    elif content_type == 'topic':
+
+        assert isinstance(content, Topic), "use Tpoc class instead of raw content"
+        if dir_path[-1] != '/':
+            dir_path += '/'
+        path = dir_path + 'topic_%s.csv' % content.topic_id
+        with open(path, 'w+') as f:
+
+            f.write('标题,%s\n' % content.title)
+            f.write('类型,%s\n' % content.topic_type)
+
+            f.write('问题,回答作者,回答内容,评论数\n')
+            for question in content.questions:
+
+                f.write('%s,%s,%s,%s\n' % question)
+
+        logger.info('topic saved')
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

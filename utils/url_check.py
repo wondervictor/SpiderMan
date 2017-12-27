@@ -12,11 +12,76 @@ URL查重处理
 2. bitarray
 
 """
-
-from bitarray import bitarray
+import re
 import math
-import mmh3
 import random
+
+import mmh3
+from bitarray import bitarray
+
+
+urls = [
+    'https://www.zhihu.com/question/26006703',
+    'https://www.zhihu.com/roundtable/jiqixuexi',
+    'https://www.zhihu.com/question/63883507/answer/227019715',
+    'https://www.zhihu.com/people/breaknever/activities',
+    'www.baidu.com',
+    'https://www.zhiha.com/dqwfq3/',
+    'https://www.zhihu.ca/wdqd21f'
+]
+
+"""
+## URL Type:
+
+* topic
+* people
+* roundtable
+* question
+
+"""
+
+
+def get_url_id(url):
+
+    """
+    https://www.zhihu.com/question/xxxxxx/xwf3qwrvq
+    :param url:
+    :return: xxxxxxx
+    """
+    s = url.replace('//', 'a')
+    s = s.split('/')
+    if len(s) < 3:
+        return None
+    return s[2]
+
+
+def filter_urls(urls):
+    """
+    URL 过滤、标签
+    过滤规则：知乎之外的网站、
+
+    :param urls:
+    :return: [(URL, URL_TYPE, URL_CONTENT)]
+    """
+    pattern = '(http|https)://www.zhihu.com/.*?'
+
+    def match_(url):
+        if re.match(pattern, url, re.S) is None:
+            return False
+        return True
+
+    urls = filter(match_, urls)
+
+    def get_type(url):
+
+        s = url.replace('//', 'a')
+        s = s.split('/')
+        url_type = s[1]
+        url_content = s[2]
+        return url, url_type, url_content
+
+    urls = map(get_type, urls)
+    return urls
 
 
 def check_urls(urls, bloom_filter):
@@ -95,3 +160,9 @@ class BloomFilter(object):
         k = (m/n)*math.log(2)
         return int(k)
 
+
+if __name__ == '__main__':
+
+    urls = filter_urls(urls)
+    for i in urls:
+        print (i)
