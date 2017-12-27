@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-import os
+import cookielib
 import sys
 sys.path.append('../')
 from common import common
@@ -13,12 +13,11 @@ headers = {
     'Host': 'www.zhihu.com',
 }
 
-
 def get_html(url, keyword=""):
      try:
 
         url = url.split('/answer')[0]
-        print(len(keyword))
+        #print(len(keyword))
         if len(keyword) > 1:
             keywords = {'q': keyword}
             r = requests.get(url, params=keywords, headers=headers)
@@ -43,17 +42,28 @@ def get_html(url, keyword=""):
         # # 设置超时时间
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
-        #driver.get("https://www.zhihu.com/settings/profile")
-        # with open('zhihucookie', 'r') as cookies:
-        #     print(cookies.read())
-        #     print("-------")
-        #     driver.add_cookie(cookies.read())
-        #     cookies.close()
-
-        driver.get(url)
+        # 测试cookie
+        # load_cookies = cookielib.LWPCookieJar()
+        # load_cookies.load(filename='zhihucookie', ignore_discard=False, ignore_expires=False)
+        # cookies = requests.utils.dict_from_cookiejar(load_cookies)
+        # print(cookies)
+        # driver.get("https://www.zhihu.com")
+        # driver.delete_all_cookies()
+        # print("----------")
+        # for item in cookies:
+        #     driver.add_cookie({
+        #         'name': item['name'],
+        #         'value': item['value'],
+        #         'path':'/',
+        #         'domain': '.zhihu.com',
+        #         'expires': '2018-01-18 15:50:29Z'
+        #     })
+        # print("----------")
+        #driver.get(url)
         # driver.get("https://www.zhihu.com/settings/profile")
         # html = driver.page_source
         # print(html)
+        driver.get(url)
         time.sleep(0.5)
         for i in range(2):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
