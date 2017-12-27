@@ -107,7 +107,7 @@ class Worker(object):
     def _crawl(self, url):
         """
         网络爬取函数
-        :param args:
+        :param url:
         :return:
         """
         content = self._crawler_func(url)

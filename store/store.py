@@ -14,7 +14,7 @@ import sys
 import sqlite3
 
 from common import log
-from model import Question, Answer
+from model import Question, Answer, Person, Topic
 
 DB_PATH = 'spiderman.db'
 
@@ -79,32 +79,6 @@ def store_answers(ques_id, answers):
     conn.commit()
     conn.close()
 
-""""
-f.write(u'人物昵称:\t'+information[0]+'\n')
-            f.write(u'人物签名:\t'+information[1]+'\n')
-            f.write(u'人物标签:\t'+information[2]+'\n')
-            f.write(u'回答数:\t\t'+information[3]+'\n')
-            f.write(u'提问数:\t\t'+information[4]+'\n')
-            f.write(u'文章数:\t\t'+information[5]+'\n')
-            f.write(u'专栏数:\t\t'+information[6]+'\n')
-            f.write(u'想法数:\t\t'+information[7]+'\n')
-            f.write('\n'+u'个人成就:'+'\n')
-            f.write(u'总赞同数:\t'+achieve[0]+'\n')
-            f.write(u'总感谢数:\t'+achieve[1]+'\n')
-            f.write(u'总收藏数:\t'+achieve[2]+'\n')
-            f.write(u'总编辑数:\t'+achieve[3]+'\n')
-            f.write(u'总关注数:\t'+achieve[4]+'\n')
-            f.write(u'被关注数:\t'+achieve[5]+'\n')
-            f.write('\n'+u'关注的信息:'+'\n')
-            f.write(u'话题:\t\t'+care[0]+'\n')
-            f.write(u'专栏:\t\t'+care[1]+'\n')
-            f.write(u'问题:\t\t'+care[2]+'\n')
-            f.write(u'收藏夹:\t\t'+care[3]+'\n')
-            f.write('\n'+u'动态:'+'\n')
-            for i in range(len(activity[0])):
-                f.write(activity[0][i]+u':\t'+activity[1][i]+'\n')
-"""
-
 
 def init_people_file(directory):
 
@@ -115,14 +89,16 @@ def init_people_file(directory):
     if not os.path.exists(path):
 
         columns = [u'人物昵称', u'人物签名', u'人物标签', u'回答数', u'提问数', u'文章数', u'专栏数', u'想法数',
-                   u'总赞同数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏', u'关注问题',
-                   u'收藏夹', u'动态']
+                   u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
+                   u'关注问题', u'收藏夹', u'动态']
         with open(path, 'w+') as f:
             line = ','.join(columns)
             line += '\n'
             f.write(line)
 
         logger.info("Created people information file: %s" % path)
+    return path
+
 
 def init_question_file(directory):
 
@@ -132,7 +108,7 @@ def init_question_file(directory):
 
     if not os.path.exists(path):
 
-        columns = [u'问题ID', u'问题标题', u'问题描述', u'问题关注数', u'问题浏览数', u'问题评论数', u'URL', u'回答文件']
+        columns = ['问题ID', '问题标题', '问题描述', '问题关注数', '问题浏览数', '问题评论数', 'URL', '回答文件']
 
         with open(path, 'w+') as f:
             line = ','.join(columns)
@@ -140,13 +116,80 @@ def init_question_file(directory):
             f.write(line)
 
         logger.info("Created question information file: %s" % path)
+    return path
 
 
-def save_file(path, content_type, content, filetype='csv'):
+def save_file(dir_path, content_type, content):
+
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
 
     if content_type == 'people':
-        # 存储用户信息
-        pass
+        # 存储用户信息 -- csv
+        path = init_people_file(dir_path)
+        assert isinstance(content, Person), "use Person class instead of raw content"
+        with open(path, 'w+') as f:
+            f.write(content.to_csv_line())
+            f.write('\n')
+        logger.info('people saved!')
+
+    elif content_type == 'question':
+        # 存储问题信息 -- csv
+        path = init_question_file(dir_path)
+        assert isinstance(content, Question), "use Question class instead of raw content"
+        with open(path, 'w+') as f:
+            f.write(content.to_csv_line())
+            f.write('\n')
+        logger.info('question saved')
+
+    elif content_type == 'answers':
+
+        """
+        content format: {id:id/name, answers:[]}
+        """
+
+        assert isinstance(content, dict), "use Dict: {id:id/name, url:url, content: content, answers:[AnswerObjects]}"
+
+        if dir_path[-1] != '/':
+            dir_path += '/'
+        path = dir_path + 'question_answer_%s.txt' % content['id']
+
+        with open(path, 'w+') as f:
+
+            f.write('[Question]:%s\n' % content['content'])
+            f.write('[URL]:%s\n' % content['url'])
+
+            answers = content['answers']
+            for ans in answers:
+                f.write(ans)
+
+        logger.info("answers saved")
+
+    elif content_type == 'topic':
+
+        assert isinstance(content, Topic), "use Tpoc class instead of raw content"
+        if dir_path[-1] != '/':
+            dir_path += '/'
+        path = dir_path + 'topic_%s.csv' % content.topic_id
+        with open(path, 'w+') as f:
+
+            f.write('标题,%s\n' % content.title)
+            f.write('类型,%s\n' % content.topic_type)
+
+            f.write('问题,回答作者,回答内容,评论数\n')
+            for question in content.questions:
+
+                f.write('%s,%s,%s,%s\n' % question)
+
+        logger.info('topic saved')
+
+
+
+
+
+
+
+
 
 
 

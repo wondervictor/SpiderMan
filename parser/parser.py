@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup as BS
 # re.compile(r'(http|https)://www.zhihu.com/search?.*?').match(url):
 
 
-class Search:
+class SearchParser:
     text = None
 
     def __init__(self, text):
@@ -157,7 +157,7 @@ class Search:
 
 # re.compile(r'(http|https)://www.zhihu.com/question.*?').match(url):
 
-class Question:
+class QuestionParser:
     text = None
 
     def __init__(self, text):
@@ -280,7 +280,7 @@ class Question:
 
 # re.compile(r'(https|http)://www.zhihu.com/people.*?').match(url)
 
-class People:
+class PeopleParser:
     text = None
 
     def __init__(self, text):
@@ -436,7 +436,7 @@ class People:
 
 # re.compile(r'(https|http)://www.zhihu.com/topic.*?').match(url)
 
-class Topic:
+class TopicParser:
     text = None
 
     def __init__(self, text):
