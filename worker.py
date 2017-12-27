@@ -18,6 +18,11 @@ WorkerConfig = collections.namedtuple("WorkerConfig",
 AUTH_KEY = 'abc'
 
 
+class Task(object):
+
+
+
+
 class Master(object):
 
     def __init__(self, address, authkey):
@@ -99,15 +104,15 @@ class Worker(object):
         BaseManager.register('get_task_queue')
         BaseManager.register('get_link_queue')
 
-    def _crawl(self, args):
+    def _crawl(self, url):
         """
         网络爬取函数
         :param args:
         :return:
         """
-        content = self._crawler_func(args)
+        content = self._crawler_func(url)
         self._content_queue.put(content)
-        print("Crawler: args: %s get: %s" % (args, content))
+        print("Crawler: args: %s get: %s" % (url, content))
 
     def _handle_content(self, content):
         """

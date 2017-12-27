@@ -1,6 +1,5 @@
 # coding:utf-8
 import os
-os.environ['KERAS_BACKEND']='theano'
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential,load_model
 from keras.layers import Convolution2D, MaxPooling2D
@@ -23,7 +22,7 @@ class_model = './classModel.h5'
 nb_train_samples = 100
 nb_validation_samples = 10
 nb_epoch = 3000
-mapList = ['3','5','6','7','8','9','A','B','D','E','F','G','H','J','K','M','N','P','R','S','T','U','V','X','Y']
+mapList = ['3', '5', '6','7','8','9','A','B','D','E','F','G','H','J','K','M','N','P','R','S','T','U','V','X','Y']
 mapArray = np.array(mapList)
 
 
@@ -41,13 +40,14 @@ def crop(im):
         region.save('captchaTemp/data/' + str(count) + '.png')
         count += 1
 
+
 def predict(cropModel,classModel):
     datagenCrop = ImageDataGenerator(rescale=1./255, zca_whitening=True)
     datagenClass = ImageDataGenerator(rescale=1./255, zca_whitening=True)
     cropGenerator = datagenCrop.flow_from_directory(
         'captchaTemp',
         color_mode='grayscale',
-        shuffle = False,
+        shuffle=False,
         target_size=(60,30))
     cropFilenames = cropGenerator.filenames
     predictCrop = cropModel.predict_generator(cropGenerator,121)
@@ -58,6 +58,8 @@ def predict(cropModel,classModel):
     goodArr = predictCrop[:,1]
     print('predictCrop: {}'.format(goodArr))
     index = np.argsort(goodArr).tolist()
+    print(len(index))
+    print(len(goodArr))
     finalIndex = [maping[p] for p in index]
     index = []
     index = finalIndex
@@ -81,7 +83,7 @@ def predict(cropModel,classModel):
     classGenerator = datagenClass.flow_from_directory(
         'tobe_classfied',
         color_mode='grayscale',
-        shuffle = False,
+        shuffle=False,
         target_size=(60,30))
     predictClass = classModel.predict_generator(classGenerator,4)
     classFilenames = classGenerator.filenames
@@ -108,6 +110,7 @@ def predict(cropModel,classModel):
     print('captcha:{}'.format(captcha))
     return captcha
 
+
 def checkAndReplace(index,target,distance):
     state = 1
     for i in range(0,len(target)-1):
@@ -120,7 +123,7 @@ def checkAndReplace(index,target,distance):
                 state *= 0
             else:
                 state *=1
-    while (state == 0):
+    while state == 0:
         state = 1
         for i in range(0,len(target)-1):
             for j in range(i+1,len(target)):
@@ -133,9 +136,10 @@ def checkAndReplace(index,target,distance):
                 else:
                     state *=1
 
+
 if __name__ == '__main__':
     cropModel = load_model(crop_model)
     classModel = load_model(class_model)
     im = Image.open('captcha.jpg')
     crop(im)
-    capcha = predict(cropModel,classModel)
+    capcha = predict(cropModel, classModel)

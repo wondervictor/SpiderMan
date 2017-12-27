@@ -161,12 +161,12 @@ class Question:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
 
-    # 返回问题的标题，主体，关注数，浏览数，评论数，回答数
+    # 返回问题的标题，主体，关注数，浏览数，评论数，回答数, URL
     def getquestion(self):
         data = self.text
 
@@ -177,6 +177,13 @@ class Question:
             question = ismatch.group(1)
         else:
             question = questions
+        # 问题 URL
+        # WARN
+        urls = data('meta', itemprop='url')
+        if len(urls):
+            question_url = urls[0]['content']
+        else:
+            question_url = ''
 
         # 得到问题的主体
         text = data(class_='QuestionRichText')
@@ -202,7 +209,7 @@ class Question:
         # 得到问题的答案数
         # answer = self.clean(data.find(class_='List-headerText').text.split(u'个')[0])
 
-        return [question, content, follows, views, comment]
+        return [question, content, follows, views, comment, question_url]
 
     def getanswer(self):
         data = self.text
@@ -254,6 +261,7 @@ class Question:
         question = self.getquestion()
         answer = self.getanswer()
         url = self.geturl()
+        print(question)
         with codecs.open('Question:'+question[0]+'.txt', 'w', 'utf-8')as f:
             f.write(u'问题标题:\t'+question[0]+'\n')
             f.write(u'问题描述:\t'+question[1]+'\n')
@@ -528,26 +536,37 @@ class Topic:
         return url
 
 
-def parse_html(content_type, content):
+# def parse_html(content_type, content):
+#
+#     if content_type == 'search':
+#         # 搜索
+#         parser = Search(content)
+#         urls = parser.total()
+#
+#     elif content_type == 'question':
+#         # 问题
+#         parser = Question(content)
+#         urls = parser.total()
+#
+#     elif content_type == 'people':
+#         # 用户
+#         parser = People(content)
+#         urls = parser.total()
+#
+#     elif content_type == 'topic':
+#         # 主题
+#         parser = Topic(content)
+#         urls = parser.total()
+#
+#     return urls
 
-    if content_type == 'search':
-        # 搜索
-        parser = Search(content)
-        urls = parser.total()
 
-    elif content_type == 'question':
-        # 问题
-        parser = Question(content)
-        urls = parser.total()
+def test_question():
 
-    elif content_type == 'people':
-        # 用户
-        parser = People(content)
-        urls = parser.total()
+    with open('test/question26006703.html', 'r') as f:
+        content = f.read().decode('utf-8')
 
-    elif content_type == 'topic':
-        # 主题
-        parser = Topic(content)
-        urls = parser.total()
+    ques = Question(content)
+    ques.total()
 
-    return urls
+test_question()
