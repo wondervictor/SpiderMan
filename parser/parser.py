@@ -597,29 +597,29 @@ class TopicParser:
         return 'topic', url, topic
 
 
-# def parse_html(content_type, content):
-#
-#     if content_type == 'search':
-#         # 搜索
-#         parser = Search(content)
-#         urls = parser.total()
-#
-#     elif content_type == 'question':
-#         # 问题
-#         parser = Question(content)
-#         urls = parser.total()
-#
-#     elif content_type == 'people':
-#         # 用户
-#         parser = People(content)
-#         urls = parser.total()
-#
-#     elif content_type == 'topic':
-#         # 主题
-#         parser = Topic(content)
-#         urls = parser.total()
-#
-#     return urls
+def parse_html(content_type, content):
+
+    if content_type == 'search':
+        # 搜索
+        parser = SearchParser(content)
+        con_type, urls, data = parser.total()
+
+    elif content_type == 'question':
+        # 问题
+        parser = QuestionParser(content)
+        con_type, urls, data = parser.total()
+
+    elif content_type == 'people':
+        # 用户
+        parser = PeopleParser(content)
+        con_type, urls, data = parser.total()
+
+    else:
+        # 主题
+        parser = TopicParser(content)
+        con_type, urls, data = parser.total()
+
+    return con_type, urls, data
 
 
 # def test_question():

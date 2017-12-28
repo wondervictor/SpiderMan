@@ -97,13 +97,13 @@ def init_question_file(directory):
     return path
 
 
-def save_file(dir_path, content_type, content):
-
-    if not os.path.exists(dir_path):
-        os.mkdir(dir_path)
+def save_file(content_type, content):
 
     if content_type == 'people':
         # 存储用户信息 -- csv
+        dir_path = './result/people/'
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         path = init_people_file(dir_path)
         assert isinstance(content, Person), "use Person class instead of raw content"
         with open(path, 'w+') as f:
@@ -113,6 +113,9 @@ def save_file(dir_path, content_type, content):
 
     elif content_type == 'question':
         # 存储问题信息 -- csv
+        dir_path = './result/question/'
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         path = init_question_file(dir_path)
         assert isinstance(content, Question), "use Question class instead of raw content"
         with open(path, 'w+') as f:
@@ -128,8 +131,9 @@ def save_file(dir_path, content_type, content):
 
         assert isinstance(content, dict), "use Dict: {filename:xx, url:url, content: content, answers:[AnswerObjects]}"
 
-        if dir_path[-1] != '/':
-            dir_path += '/'
+        dir_path = './result/answers/'
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         path = dir_path + content['filename']
 
         with open(path, 'w+') as f:
@@ -146,8 +150,10 @@ def save_file(dir_path, content_type, content):
     elif content_type == 'topic':
 
         assert isinstance(content, Topic), "use Tpoc class instead of raw content"
-        if dir_path[-1] != '/':
-            dir_path += '/'
+        dir_path = './result/topic/'
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+
         path = dir_path + 'topic_%s.csv' % content.topic_id
         with open(path, 'w+') as f:
 

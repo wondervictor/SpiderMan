@@ -104,13 +104,6 @@ def get_html(url, keyword=""):
         # driver.get("https://www.zhihu.com/settings/profile")
         # html = driver.page_source
         # print(html)
-        driver.get(url)
-        time.sleep(0.5)
-        for i in range(2):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(3)
-        html = driver.page_source
-        print (html)
         # # session_token = re.findall(r'session_token=([0-9,a-z]{32})', r.text)[0]
         # auto = re.findall(r'carCompose&quot;:&quot;(.*?)&quot', r.text)[0]
         # print(session_token)
@@ -124,5 +117,6 @@ def main():
     # keyword = ""
     # url = "https://www.zhihu.com/question/65483475/answer/261582944"
     get_html(url,keyword)
+
 
 main()
