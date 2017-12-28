@@ -6,6 +6,7 @@ sys.path.append('../')
 from common import common
 import requests
 from selenium import webdriver
+import phantomas
 
 headers = {
     "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
@@ -43,23 +44,63 @@ def get_html(url, keyword=""):
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
         # 测试cookie
-        # load_cookies = cookielib.LWPCookieJar()
-        # load_cookies.load(filename='zhihucookie', ignore_discard=False, ignore_expires=False)
-        # cookies = requests.utils.dict_from_cookiejar(load_cookies)
-        # print(cookies)
-        # driver.get("https://www.zhihu.com")
-        # driver.delete_all_cookies()
-        # print("----------")
-        # for item in cookies:
-        #     driver.add_cookie({
-        #         'name': item['name'],
-        #         'value': item['value'],
-        #         'path':'/',
-        #         'domain': '.zhihu.com',
-        #         'expires': '2018-01-18 15:50:29Z'
-        #     })
-        # print("----------")
-        #driver.get(url)
+        load_cookies = cookielib.LWPCookieJar()
+        load_cookies.load(filename='zhihucookie', ignore_discard=False, ignore_expires=False)
+        cookies = requests.utils.dict_from_cookiejar(load_cookies)
+        #print(cookies)
+        driver.get("https://www.zhihu.com")
+        driver.delete_all_cookies()
+        for name,value in cookies.items():
+             try:
+                # print("----------")
+                # print(name)
+                # print(value)
+                driver.add_cookie({
+                'name': name,
+                'value': value,
+                'path':'/',
+                'domain': '.zhihu.com',
+                 })
+             except:
+                 pass
+                # cookie1 = {
+                #     'name': 'cap_id',
+                #     'value':'\"OTMxMmFmNmRmYzhkNDlkZDgxNTYwNjU4NmY3NGM5ZjI=|1513698629|2dd5a1effdf15f6c62b29ab05974896c3cddefa1\"' ,
+                #     'path':'/',
+                #     'domain': '.zhihu.com',
+                #     'expires': '2018-01-18 15:50:29Z',
+                #     'version': 0
+                # }
+                # cookie2 = {
+                #     'name': 'q_c1',
+                #     'value':'\"84f083b94bde45cd8ac315a1bd838602|1513698629000|1513698629000' ,
+                #     'path':'/',
+                #     'domain': '.zhihu.com',
+                #     'expires': '2018-01-18 15:50:29Z',
+                #     'version': 0
+                # }
+                # cookie3 = {
+                #     'name': 'r_cap_id',
+                #     'value':'\"OTMxNGY2MTk4ZmE2NDM3OWI2ZWJhODk1NjgxNmFhZjg=|1513698629|93d57f86473d37de8c7876949fecf6455539fdd5\"' ,
+                #     'path':'/',
+                #     'domain': '.zhihu.com',
+                #     'expires': '2018-01-18 15:50:29Z',
+                #     'version': 0
+                # }
+                # cookie4 = {
+                #     'name': 'z_c0',
+                #     'value':'\"MS4xY25YRkFRQUFBQUFYQUFBQVlRSlZUVnlESmx1VkdReWxVUjZhbm1Jd0hRUFNjM0FVNWdiV09BPT0=|1513698652|56e298ed1f4f73655cce6bdac7c9f2df1c21ee0a\"' ,
+                #     'path':'/',
+                #     'domain': '.zhihu.com',
+                #     'expires': '2018-01-18 15:50:29Z',
+                #     'version': 0
+                # }
+                # driver.add_cookie(cookie1)
+                # driver.add_cookie(cookie2)
+                # driver.add_cookie(cookie3)
+                # driver.add_cookie(cookie4)
+
+        # driver.get(url)
         # driver.get("https://www.zhihu.com/settings/profile")
         # html = driver.page_source
         # print(html)

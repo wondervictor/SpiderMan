@@ -150,7 +150,7 @@ class Login(object):
         self._session.cookies.save()
 
 
-if __name__ == '__main__':
-
-    login = Login()
-    login.check()
+# if __name__ == '__main__':
+#
+#     login = Login()
+#     login.check()
