@@ -38,30 +38,30 @@ def get_html(url, keyword=""):
             exec_path = './phantomjs/phantomjs'
         else:
             exec_path = './phantomjs/phantomjs.exe'
-        driver = webdriver.PhantomJS(exec_path,service_args=service_args)
+        driver = webdriver.PhantomJS(exec_path,service_args=service_args,desired_capabilities=desired_capabilities)
         # # 设置超时时间
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
-        # 测试cookie
-        load_cookies = cookielib.LWPCookieJar()
-        load_cookies.load(filename='zhihucookie', ignore_discard=False, ignore_expires=False)
-        cookies = requests.utils.dict_from_cookiejar(load_cookies)
-        #print(cookies)
-        driver.get("https://www.zhihu.com")
-        driver.delete_all_cookies()
-        for name,value in cookies.items():
-             try:
-                # print("----------")
-                # print(name)
-                # print(value)
-                driver.add_cookie({
-                'name': name,
-                'value': value,
-                'path':'/',
-                'domain': '.zhihu.com',
-                 })
-             except:
-                 pass
+        # # 测试cookie
+        # load_cookies = cookielib.LWPCookieJar()
+        # load_cookies.load(filename='zhihucookie', ignore_discard=False, ignore_expires=False)
+        # cookies = requests.utils.dict_from_cookiejar(load_cookies)
+        # #print(cookies)
+        # driver.get("https://www.zhihu.com")
+        # driver.delete_all_cookies()
+        # for name,value in cookies.items():
+        #      try:
+        #         # print("----------")
+        #         # print(name)
+        #         # print(value)
+        #         driver.add_cookie({
+        #         'name': name,
+        #         'value': value,
+        #         'path':'/',
+        #         'domain': '.zhihu.com',
+        #          })
+        #      except:
+        #          pass
                 # cookie1 = {
                 #     'name': 'cap_id',
                 #     'value':'\"OTMxMmFmNmRmYzhkNDlkZDgxNTYwNjU4NmY3NGM5ZjI=|1513698629|2dd5a1effdf15f6c62b29ab05974896c3cddefa1\"' ,
