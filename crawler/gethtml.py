@@ -38,7 +38,7 @@ def get_html(url, keyword=""):
             exec_path = './phantomjs/phantomjs'
         else:
             exec_path = './phantomjs/phantomjs.exe'
-        driver = webdriver.PhantomJS(exec_path,service_args=service_args,desired_capabilities=desired_capabilities)
+        driver = webdriver.PhantomJS(exec_path,service_args=service_args)
         # # 设置超时时间
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
@@ -120,5 +120,4 @@ def main():
     # keyword = ""
     # url = "https://www.zhihu.com/question/65483475/answer/261582944"
     page = get_html(url,keyword)
-
 main()

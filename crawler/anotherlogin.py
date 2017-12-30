@@ -3,6 +3,7 @@ from selenium import webdriver
 from common import common
 import time
 import sys
+import cookielib
 sys.path.append('../')
 
 if common.check_system() == 'macOS':
@@ -10,11 +11,11 @@ if common.check_system() == 'macOS':
 else:
     exec_path = './phantomjs/phantomjs.exe'
 driver = webdriver.PhantomJS(exec_path)
-driver.set_page_load_timeout(20)
+driver.set_page_load_timeout(30)
 driver.get('https://www.zhihu.com/')
 
-account = raw_input('请输入你的用户名\n>  ')
-secret = raw_input("请输入你的密码\n>  ")
+account = raw_input('请输入你的用户名\n>')
+secret = raw_input("请输入你的密码\n>")
 email = driver.find_element_by_xpath("//input[@name='username']")
 email.clear()
 email.send_keys(account)
@@ -24,6 +25,7 @@ password.send_keys(secret)
 driver.find_element_by_class_name("SignFlow-submitButton").click()
 time.sleep(3)
 html = driver.page_source
-driver.get_cookies()
-print html
+cookie = driver.get_cookies()
+
+print cookie
 driver.quit()
