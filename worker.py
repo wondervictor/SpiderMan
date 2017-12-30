@@ -59,7 +59,7 @@ class Master(object):
         while True:
             try:
                 urls = self.links.get(timeout=2)
-                # urls = url_check.check_urls(urls, self.checker)
+                urls = url_check.check_urls(urls, self.checker)
                 for url in urls:
                     self.tasks.put(url)
                 print("GET URLS: %s" % len(urls))
@@ -102,8 +102,8 @@ class Worker(object):
         :return:
         """
         content = self._crawler_func(url)
-        if content
-        self._content_queue.put((url, content))
+        if content is not None:
+            self._content_queue.put((url, content))
         print("Crawler: args: %s get: %s" % (url, content))
 
     def _handle_content(self, content, content_type):
