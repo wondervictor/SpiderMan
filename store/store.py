@@ -70,7 +70,7 @@ def init_people_file(directory):
         columns = [u'人物昵称', u'人物签名', u'人物标签', u'回答数', u'提问数', u'文章数', u'专栏数', u'想法数',
                    u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
                    u'关注问题', u'收藏夹', u'动态']
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
             line = ','.join(columns)
             line += '\n'
             f.write(line)
@@ -89,7 +89,7 @@ def init_question_file(directory):
 
         columns = [u'问题ID', u'问题标题', u'问题描述', u'问题关注数', u'问题浏览数', u'问题评论数', u'URL', u'回答文件']
 
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
             line = ','.join(columns)
             line += '\n'
             f.write(line)
@@ -107,7 +107,7 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = init_people_file(dir_path)
         assert isinstance(content, Person), "use Person class instead of raw content"
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
             f.write(u'%s\n' % content.to_csv_line())
         logger.info('people saved!')
 
@@ -118,7 +118,7 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = init_question_file(dir_path)
         assert isinstance(content, Question), "use Question class instead of raw content"
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
             f.write(u'%s\n' % content.to_csv_line())
         logger.info('question saved')
 
@@ -135,7 +135,7 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = dir_path + content['filename']
 
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
 
             f.write(u'[Question]:%s\n' % content['content'])
             f.write(u'[URL]:%s\n\n' % content['url'])
@@ -154,7 +154,7 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
 
         path = dir_path + 'topic_%s.csv' % content.topic_id
-        with codecs.open(path, 'w+', 'utf-8') as f:
+        with codecs.open(path, 'a+', 'utf-8') as f:
 
             f.write(u'标题,%s\n' % content.title)
             f.write(u'类型,%s\n' % content.topic_type)

@@ -36,11 +36,11 @@ def get_html(url, keyword=""):
         service_args.append('--disk-cache=yes')
         system = common.check_system()
         if system == 'macOS':
-            exec_path = './phantomjs/phantomjs'
+            exec_path = 'crawler/phantomjs/phantomjs'
         elif system == 'linux':
             exec_path = 'crawler/phantomjs/phantomjs_linux'
         else:
-            exec_path = './phantomjs/phantomjs.exe'
+            exec_path = 'crawler/phantomjs/phantomjs.exe'
         driver = webdriver.PhantomJS(exec_path,service_args=service_args)
         # # 设置超时时间
         driver.implicitly_wait(30)

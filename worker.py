@@ -8,10 +8,11 @@ from multiprocessing.managers import BaseManager
 
 from common import log
 from store import store
-from parser import parser
 from utils import url_check
 from parallel import smthread
 from crawler import login, gethtml
+from parser import parser as htmlparse
+
 
 WorkerConfig = collections.namedtuple("WorkerConfig",
                                       "task_batchsize, address, authkey, crawler_threads, parser_threads, name")
@@ -31,6 +32,7 @@ class Master(object):
         self.task_queue = Queue.Queue()
         self.link_queue = Queue.Queue()
         self._init_environment()
+        self._init_checker()
         self.manager = BaseManager(address=address, authkey=authkey)
         self.tasks = None
         self.links = None
@@ -62,9 +64,9 @@ class Master(object):
                 urls = url_check.check_urls(urls, self.checker)
                 for url in urls:
                     self.tasks.put(url)
-                print("GET URLS: %s" % len(urls))
+                self.logger.info('GET URLS: %s' % len(urls))
             except Queue.Empty:
-                print("No more URLs")
+                self.logger.info('Waiting for URLS')
                 continue
 
 
@@ -103,8 +105,11 @@ class Worker(object):
         """
         content = self._crawler_func(url)
         if content is not None:
-            self._content_queue.put((url, content))
-        print("Crawler: args: %s get: %s" % (url, content))
+            self.parser_manager.do((url, content))
+            self.logger.info("[Crawler] Finish crawling %s" % url)
+        else:
+            self.crawler_manager.do(url)
+            self.logger.warn("[Crawler] Crawler Failed %s" % url)
 
     def _handle_content(self, content, content_type):
         """
@@ -123,8 +128,9 @@ class Worker(object):
         url, content = args
         content_type = url_check.get_url_type(url)
         content_type, links, content = self._parser_func(content_type, content)
-        self.links.put(links)
-        print(self.links.qsize())
+        if len(links):
+            self.links.put(links)
+        self.logger.info("[Parser] Finish parsing %s" % url)
         self._handle_content(content, content_type)
 
     def _init_threads(self):
@@ -146,9 +152,9 @@ class Worker(object):
         while True:
             try:
                 url = self.tasks.get(timeout=1)
-                self.logger.info('get url: %s' % url)
                 self.crawler_manager.do(url)
             except Queue.Empty:
+                self.logger.info('URL Queue is Empty now ...')
                 print("URL queue is empty now ....")
 
             try:
@@ -156,7 +162,7 @@ class Worker(object):
                 self.parser_manager.do((url_, content))
 
             except Queue.Empty:
-                print("Worker content queue is empty now ...")
+                self.logger.info('Worker Content is Empty now ...')
 
 
 # Test Distributed
@@ -167,25 +173,36 @@ def crawl_func(s):
 
 def parse_func(content_type, content):
 
-    return parser.parse_html(content_type, content)
+    return htmlparse.parse_html(content_type, content)
 
 
 def test_master():
 
     master = Master(('0.0.0.0', 23333), AUTH_KEY)
-    master.start(['hello', 'world', 'fwqrgfq', 'wgfq34g2', 'qfwef3qg3q', 'wqf3qgqgqq', 'fqwfgqg'])
+    urls = [
+        'https://www.zhihu.com/question/26006703',
+        'https://www.zhihu.com/topic',
+        'https://www.zhihu.com/topic/19565870',
+        'https://www.zhihu.com/topic/19550355',
+        'https://www.zhihu.com/question/264580669',
+        'https://www.zhihu.com/people/webto/',
+        'https://www.zhihu.com/question/29130226/answer/284394337',
+        'https://www.zhihu.com/question/30943322',
+        'https://www.zhihu.com/question/52253320/answer/284550438',
+    ]
+    master.start(urls)
     master.run()
 
 
-def test_worker():
+def test_worker(ip):
 
     config = WorkerConfig(
         name='worker',
-        task_batchsize=4,
-        crawler_threads=2,
+        task_batchsize=2,
+        crawler_threads=4,
         parser_threads=4,
         authkey=AUTH_KEY,
-        address=('0.0.0.0', 23333)
+        address=(ip, 23333)
     )
 
     worker = Worker(config=config, crawler_func=crawl_func, parser_func=parse_func)
@@ -193,16 +210,17 @@ def test_worker():
     worker.run()
 
 
-# if __name__ == '__main__':
-#     multiprocessing.current_process().authkey = AUTH_KEY
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--worker', type=int, default=1, help='worker node')
-#
-#     args = parser.parse_args()
-#
-#     if args.worker == 1:
-#         test_worker()
-#     else:
-#         test_master()
+if __name__ == '__main__':
+    multiprocessing.current_process().authkey = AUTH_KEY
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--worker', type=int, default=1, help='worker node')
+    parser.add_argument('--master_ip', type=str, default='0.0.0.0', help='Master IP')
+
+    args = parser.parse_args()
+
+    if args.worker == 1:
+        test_worker(args.master_ip)
+    else:
+        test_master()
 
 

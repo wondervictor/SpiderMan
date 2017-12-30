@@ -1,7 +1,12 @@
 # -*- coding:utf-8 -*-
-import codecs
-from bs4 import BeautifulSoup as BS
 import re
+import sys
+import codecs
+sys.path.append('../')
+from utils import url_check
+from store import model, store
+from bs4 import BeautifulSoup as BS
+
 # 需要爬取问题本体，问题的提出者，浏览次数，点赞次数，答案，答案的作者，答案的评论，答案获得的点赞数
 # 通过判断url的后缀来判断调用的类的类型
 # 只需调用类的total函数，返回的是url的列表
@@ -9,11 +14,11 @@ import re
 # re.compile(r'(http|https)://www.zhihu.com/search?.*?').match(url):
 
 
-class Search:
+class SearchParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
@@ -156,16 +161,16 @@ class Search:
 
 # re.compile(r'(http|https)://www.zhihu.com/question.*?').match(url):
 
-class Question:
+class QuestionParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
 
-    # 返回问题的标题，主体，关注数，浏览数，评论数，回答数
+    # 返回问题的标题，主体，关注数，浏览数，评论数，回答数, URL
     def getquestion(self):
         data = self.text
 
@@ -176,6 +181,18 @@ class Question:
             question = ismatch.group(1)
         else:
             question = questions
+        # 问题 URL
+        # WARN
+        urls = data('meta', itemprop='url')
+        if len(urls):
+            question_url = urls[0]['content']
+        else:
+            question_url = ''
+
+        question_id = url_check.get_url_id(question_url)
+        if question_id is None:
+            question_id = question
+
 
         # 得到问题的主体
         text = data(class_='QuestionRichText')
@@ -201,7 +218,7 @@ class Question:
         # 得到问题的答案数
         # answer = self.clean(data.find(class_='List-headerText').text.split(u'个')[0])
 
-        return [question, content, follows, views, comment]
+        return [question_id, question, content, follows, views, comment, question_url]
 
     def getanswer(self):
         data = self.text
@@ -212,7 +229,7 @@ class Question:
         for tag in data(class_='AuthorInfo-content'):
             for name in tag(class_='UserLink'):
                 writer.append(self.clean(name.text))
-                if(self.clean(name.text)==u'匿名用户'):
+                if self.clean(name.text) == u'匿名用户':
                     sign.append(u'无')
                 else:
                     for signs in tag(class_='AuthorInfo-badgeText'):
@@ -253,29 +270,64 @@ class Question:
         question = self.getquestion()
         answer = self.getanswer()
         url = self.geturl()
-        with codecs.open('Question:'+question[0]+'.txt', 'w', 'utf-8')as f:
-            f.write(u'问题标题:\t'+question[0]+'\n')
-            f.write(u'问题描述:\t'+question[1]+'\n')
-            f.write(u'问题关注数:\t'+question[2]+'\n')
-            f.write(u'问题浏览数:\t'+question[3]+'\n')
-            f.write(u'问题评论数:\t'+question[4]+'\n')
-            for i in range(len(answer[0])):
-                f.write('\n'+u'答者昵称:\t'+answer[0][i]+'\n')
-                f.write(u'答者标签:\t'+answer[1][i]+'\n')
-                f.write(u'答案内容:\t'+answer[2][i]+'\n')
-                f.write(u'赞同数:\t\t'+answer[3][i]+'\n')
-                f.write(u'评论数:\t\t'+answer[4][i]+'\n')
+        print(question)
 
-        return url
+        # [question_id, question, content, follows, views, comment, question_url]
+        question_ = model.Question(
+            ques_id=question[0],
+            url=question[6],
+            title=question[1],
+            description=question[2],
+            follower=question[3],
+            views=question[4],
+            comments=question[4],
+            answer_file='question_answers_%s.txt' % question[0]
+        )
+
+        answer_ = []
+        for i in xrange(len(answer[0])):
+            try:
+                ans_ = model.Answer(
+                    question=question[0],
+                    name=answer[0][i],
+                    user_tag=answer[1][i],
+                    content=answer[2][i],
+                    ups=answer[3][i],
+                    comments=answer[4][i]
+                )
+                answer_.append(ans_)
+            except IndexError:
+                break
+
+        ans = dict()
+        ans['filename'] = 'question_answers_%s.txt' % question[0]
+        ans['url'] = question[6]
+        ans['content'] = question[2]
+        ans['answers'] = answer_
+        store.save_file('answers', ans)
+        # with codecs.open('Question:'+question[0]+'.txt', 'w', 'utf-8')as f:
+        #     f.write(u'问题标题:\t'+question[0]+'\n')
+        #     f.write(u'问题描述:\t'+question[1]+'\n')
+        #     f.write(u'问题关注数:\t'+question[2]+'\n')
+        #     f.write(u'问题浏览数:\t'+question[3]+'\n')
+        #     f.write(u'问题评论数:\t'+question[4]+'\n')
+        #     for i in range(len(answer[0])):
+        #         f.write('\n'+u'答者昵称:\t'+answer[0][i]+'\n')
+        #         f.write(u'答者标签:\t'+answer[1][i]+'\n')
+        #         f.write(u'答案内容:\t'+answer[2][i]+'\n')
+        #         f.write(u'赞同数:\t\t'+answer[3][i]+'\n')
+        #         f.write(u'评论数:\t\t'+answer[4][i]+'\n')
+
+        return 'question', url, question_
 
 
 # re.compile(r'(https|http)://www.zhihu.com/people.*?').match(url)
 
-class People:
+class PeopleParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
@@ -397,41 +449,53 @@ class People:
         # 网页信息
         url = self.geturl()
 
-        with codecs.open('People:'+information[0]+'.txt', 'w', 'utf-8')as f:
-            f.write(u'人物昵称:\t'+information[0]+'\n')
-            f.write(u'人物签名:\t'+information[1]+'\n')
-            f.write(u'人物标签:\t'+information[2]+'\n')
-            f.write(u'回答数:\t\t'+information[3]+'\n')
-            f.write(u'提问数:\t\t'+information[4]+'\n')
-            f.write(u'文章数:\t\t'+information[5]+'\n')
-            f.write(u'专栏数:\t\t'+information[6]+'\n')
-            f.write(u'想法数:\t\t'+information[7]+'\n')
-            f.write('\n'+u'个人成就:'+'\n')
-            f.write(u'总赞同数:\t'+achieve[0]+'\n')
-            f.write(u'总感谢数:\t'+achieve[1]+'\n')
-            f.write(u'总收藏数:\t'+achieve[2]+'\n')
-            f.write(u'总编辑数:\t'+achieve[3]+'\n')
-            f.write(u'总关注数:\t'+achieve[4]+'\n')
-            f.write(u'被关注数:\t'+achieve[5]+'\n')
-            f.write('\n'+u'关注的信息:'+'\n')
-            f.write(u'话题:\t\t'+care[0]+'\n')
-            f.write(u'专栏:\t\t'+care[1]+'\n')
-            f.write(u'问题:\t\t'+care[2]+'\n')
-            f.write(u'收藏夹:\t\t'+care[3]+'\n')
-            f.write('\n'+u'动态:'+'\n')
-            for i in range(len(activity[0])):
-                f.write(activity[0][i]+u':\t'+activity[1][i]+'\n')
+        # Convert to People Model
 
-        return url
+        person = model.Person(
+            name=information[0],
+            signature=information[1],
+            tag=information[2],
+            counters=information[3:],
+            achievements=achieve,
+            cares=care,
+            activities=activity
+        )
+
+        # with codecs.open('People:'+information[0]+'.txt', 'w', 'utf-8')as f:
+        #     f.write(u'人物昵称:\t'+information[0]+'\n')
+        #     f.write(u'人物签名:\t'+information[1]+'\n')
+        #     f.write(u'人物标签:\t'+information[2]+'\n')
+        #     f.write(u'回答数:\t\t'+information[3]+'\n')
+        #     f.write(u'提问数:\t\t'+information[4]+'\n')
+        #     f.write(u'文章数:\t\t'+information[5]+'\n')
+        #     f.write(u'专栏数:\t\t'+information[6]+'\n')
+        #     f.write(u'想法数:\t\t'+information[7]+'\n')
+        #     f.write('\n'+u'个人成就:'+'\n')
+        #     f.write(u'总赞同数:\t'+achieve[0]+'\n')
+        #     f.write(u'总感谢数:\t'+achieve[1]+'\n')
+        #     f.write(u'总收藏数:\t'+achieve[2]+'\n')
+        #     f.write(u'总编辑数:\t'+achieve[3]+'\n')
+        #     f.write(u'总关注数:\t'+achieve[4]+'\n')
+        #     f.write(u'被关注数:\t'+achieve[5]+'\n')
+        #     f.write('\n'+u'关注的信息:'+'\n')
+        #     f.write(u'话题:\t\t'+care[0]+'\n')
+        #     f.write(u'专栏:\t\t'+care[1]+'\n')
+        #     f.write(u'问题:\t\t'+care[2]+'\n')
+        #     f.write(u'收藏夹:\t\t'+care[3]+'\n')
+        #     f.write('\n'+u'动态:'+'\n')
+        #     for i in range(len(activity[0])):
+        #         f.write(activity[0][i]+u':\t'+activity[1][i]+'\n')
+
+        return 'people', url, person
 
 
 # re.compile(r'(https|http)://www.zhihu.com/topic.*?').match(url)
 
-class Topic:
+class TopicParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
@@ -515,14 +579,58 @@ class Topic:
         simpletext = self.getinformation()[4]
         comments = self.getinformation()[5]
 
-        with codecs.open('Topic:'+title+'.txt', 'w', 'utf-8')as f:
-            f.write(u'话题:\t\t'+title+'\n')
-            f.write(u'类型:\t\t'+kind+'\n')
-            for i in range(len(names)):
-                f.write('\n'+u'问题题目:\t'+questions[i]+'\n')
-                f.write(u'回答作者:\t'+names[i]+'\n')
-                f.write(u'回答简述:\t'+simpletext[i]+'\n')
-                f.write(u'评论数:\t\t'+comments[i]+'\n')
+        topic = model.Topic(
+            topic_id='',
+            title=title,
+            topic_type=kind,
+            questions=questions,
+            question_answer=simpletext,
+            question_user=names,
+            question_comments=comments
+        )
+        # with codecs.open('Topic:'+title+'.txt', 'w', 'utf-8')as f:
+        #     f.write(u'话题:\t\t'+title+'\n')
+        #     f.write(u'类型:\t\t'+kind+'\n')
+        #     for i in range(len(names)):
+        #         f.write('\n'+u'问题题目:\t'+questions[i]+'\n')
+        #         f.write(u'回答作者:\t'+names[i]+'\n')
+        #         f.write(u'回答简述:\t'+simpletext[i]+'\n')
+        #         f.write(u'评论数:\t\t'+comments[i]+'\n')
 
-        return url
+        return 'topic', url, topic
 
+
+def parse_html(content_type, content):
+
+    if content_type == 'search':
+        # 搜索
+        parser = SearchParser(content)
+        con_type, urls, data = parser.total()
+
+    elif content_type == 'question':
+        # 问题
+        parser = QuestionParser(content)
+        con_type, urls, data = parser.total()
+
+    elif content_type == 'people':
+        # 用户
+        parser = PeopleParser(content)
+        con_type, urls, data = parser.total()
+
+    else:
+        # 主题
+        parser = TopicParser(content)
+        con_type, urls, data = parser.total()
+
+    return con_type, urls, data
+
+
+# def test_question():
+#
+#     with open('test/question26006703.html', 'r') as f:
+#         content = f.read().decode('utf-8')
+#
+#     ques = Question(content)
+#     ques.total()
+#
+# test_question()
