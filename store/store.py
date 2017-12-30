@@ -87,7 +87,7 @@ def init_question_file(directory):
 
     if not os.path.exists(path):
 
-        columns = ['问题ID', '问题标题', '问题描述', '问题关注数', '问题浏览数', '问题评论数', 'URL', '回答文件']
+        columns = [u'问题ID', u'问题标题', u'问题描述', u'问题关注数', u'问题浏览数', u'问题评论数', u'URL', u'回答文件']
 
         with codecs.open(path, 'w+', 'utf-8') as f:
             line = ','.join(columns)
@@ -138,7 +138,7 @@ def save_file(content_type, content):
         with codecs.open(path, 'w+', 'utf-8') as f:
 
             f.write(u'[Question]:%s\n' % content['content'])
-            f.write(u'[URL]:%s\n' % content['url'])
+            f.write(u'[URL]:%s\n\n' % content['url'])
 
             answers = content['answers']
             for ans in answers:

@@ -88,7 +88,7 @@ class Person(object):
         :return:
         """
         activity = ''
-        for i in xrange(len(self.activities[0])):
+        for i in xrange(min(len(self.activities[0]), len(self.activities[1]))):
             activity += self.activities[0][i] + ':' + self.activities[1][i] + '\n'
 
         line = ['%s'] * 19
