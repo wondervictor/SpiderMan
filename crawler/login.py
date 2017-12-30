@@ -27,11 +27,10 @@ class Login(object):
 
     def _init_session(self):
         self._session = requests.session()
-        self._session.cookies = cookielib.LWPCookieJar(filename='zhihucookie')
+        self._session.cookies = cookielib.LWPCookieJar(filename='crawler/zhihucookie')
         try:
             self._session.cookies.load(ignore_discard=True)
         except:
-
             print('cookie 文件未能加载')
 
     def check(self):

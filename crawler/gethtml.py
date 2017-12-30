@@ -17,7 +17,6 @@ headers = {
 def get_html(url, keyword=""):
     try:
         url = url.split('/answer')[0]
-        #print(len(keyword))
         if len(keyword) > 1:
             keywords = {'q': keyword}
             r = requests.get(url, params=keywords, headers=headers)
@@ -38,7 +37,7 @@ def get_html(url, keyword=""):
             exec_path = './phantomjs/phantomjs'
         else:
             exec_path = './phantomjs/phantomjs.exe'
-        driver = webdriver.PhantomJS(exec_path,service_args=service_args,desired_capabilities=desired_capabilities)
+        driver = webdriver.PhantomJS(exec_path, service_args=service_args)
         # # 设置超时时间
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
@@ -111,16 +110,17 @@ def get_html(url, keyword=""):
         html = driver.page_source
         driver.quit()
         return html
-     except:
-        print ("crawl failed")
+    except:
+        # print ("crawl failed")
         return None
 
 
 def main():
-    keyword = "Vic Chan"
-    url = "https://www.zhihu.com/search?"
+    #keyword = "Vic Chan"
+    #url = "https://www.zhihu.com/search?"
     # keyword = ""
-    # url = "https://www.zhihu.com/question/65483475/answer/261582944"
-    page = get_html(url,keyword)
+    url = "https://www.zhihu.com/question/65483475/answer/261582944"
+    page = get_html(url, "")
+    print(page)
 
 # main()
