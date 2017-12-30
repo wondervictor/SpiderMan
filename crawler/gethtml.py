@@ -13,9 +13,9 @@ headers = {
     'Host': 'www.zhihu.com',
 }
 
-def get_html(url, keyword=""):
-     try:
 
+def get_html(url, keyword=""):
+    try:
         url = url.split('/answer')[0]
         #print(len(keyword))
         if len(keyword) > 1:
@@ -113,6 +113,8 @@ def get_html(url, keyword=""):
         return html
      except:
         print ("crawl failed")
+        return None
+
 
 def main():
     keyword = "Vic Chan"
@@ -121,4 +123,4 @@ def main():
     # url = "https://www.zhihu.com/question/65483475/answer/261582944"
     page = get_html(url,keyword)
 
-main()
+# main()

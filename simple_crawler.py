@@ -6,32 +6,47 @@ Simple Crawler
 单机版
 
 """
+import Queue
 
 from common import log
+from store import store
 from parser import parser
-from crawler import gethtml
 from crawler import login
+from crawler import gethtml
+from utils import url_check
 from parallel import smthread
 
 
 class Application(object):
 
-    def __init__(self):
+    def __init__(self, parser, cralwer):
         self.logger = log.Logger('Application')
         self.crawler_manager = smthread.SMThreadManager(max_threads=4, func=self._crawl)
         self.parser_manager = smthread.SMThreadManager(max_threads=2, func=self._parse)
         self.login = login.Login()
+        self._parser = parser
+        self._crawler = cralwer
+        self._checker = url_check.BloomFilter(item_count=10000, prob=0.01)
 
-    def start(self):
+    def start(self, init_urls):
         self.login.check()
+        for url in init_urls:
+            self.crawler_manager.do(url)
+        self.logger.info("Starting to Crawl")
 
-    def _parse(self, content):
+    def _parse(self, args):
         """
         解析出内容和url
         :param content:
         :return:
         """
-        pass
+        url, content = args
+        content_type = url_check.get_url_type(url)
+        content_type, links, content = self._parser(content_type, content)
+        urls = url_check.check_urls(links, self._checker)
+        store.save_file(content_type, content)
+        for url in urls:
+            self.crawler_manager.do(url)
 
     def _crawl(self, url):
         """
@@ -39,5 +54,36 @@ class Application(object):
         :param url:
         :return:
         """
-        pass
+        content = self._crawler(url)
+        if content is not None:
+            self.parser_manager.do((url, content))
 
+def _parser(content_type, content):
+
+    parser.parse_html(content_type, content)
+
+
+def _get_html(url):
+
+    return gethtml.get_html(url)
+
+
+def main():
+
+    app = Application(_parser, _get_html)
+    urls = [
+        'https://www.zhihu.com/question/26006703',
+        'https://www.zhihu.com/topic',
+        'https://www.zhihu.com/topic#%E7%94%B5%E5%BD%B1',
+        'https://www.zhihu.com/topic#%E4%BA%92%E8%81%94%E7%BD%91',
+        'https://www.zhihu.com/question/264580669',
+        'https://www.zhihu.com/people/webto/',
+        'https://www.zhihu.com/question/29130226/answer/284394337',
+        'https://www.zhihu.com/question/30943322',
+        'https://www.zhihu.com/question/52253320/answer/284550438',
+    ]
+    app.start(urls)
+
+
+if __name__ == '__main__':
+    main()
