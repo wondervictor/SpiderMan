@@ -38,7 +38,7 @@ class Answer(object):
 
     def __str__(self):
 
-        s = "[回答者]:%s\n[回答者标签]:%s\n[内容]:%s\n[赞同数]:%s\n[评论数]:%s\n" % \
+        s = u"[回答者]:%s\n[回答者标签]:%s\n[内容]:%s\n[赞同数]:%s\n[评论数]:%s\n" % \
             (self.name, self.user_tag, self.content, self.ups, self.comments)
         return s
 

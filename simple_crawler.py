@@ -52,7 +52,8 @@ class Application(object):
         url, content = args
         content_type = url_check.get_url_type(url)
         content_type, links, content = self._parser(content_type, content)
-        self.links_queue.put(links)
+        if len(links):
+            self.links_queue.put(links)
         store.save_file(content_type, content)
         self.logger.info("[Parser] Finish parsing %s" % url)
 
@@ -67,12 +68,13 @@ class Application(object):
             self.parser_manager.do((url, content))
             self.logger.info("[Crawler] Finish crawling %s" % url)
         else:
-            self.logger.error("[Crawler] Crawler Failed %s" % url)
+            self.crawler_manager.do(url)
+            self.logger.warn("[Crawler] Crawler Failed %s" % url)
 
 
 def _parser(content_type, content):
 
-    parser.parse_html(content_type, content)
+    return parser.parse_html(content_type, content)
 
 
 def _get_html(url):
@@ -86,8 +88,8 @@ def main():
     urls = [
         'https://www.zhihu.com/question/26006703',
         'https://www.zhihu.com/topic',
-        'https://www.zhihu.com/topic#%E7%94%B5%E5%BD%B1',
-        'https://www.zhihu.com/topic#%E4%BA%92%E8%81%94%E7%BD%91',
+        'https://www.zhihu.com/topic/19565870',
+        'https://www.zhihu.com/topic/19550355',
         'https://www.zhihu.com/question/264580669',
         'https://www.zhihu.com/people/webto/',
         'https://www.zhihu.com/question/29130226/answer/284394337',

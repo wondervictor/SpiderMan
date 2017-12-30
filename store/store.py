@@ -11,6 +11,7 @@ Table1
 """
 import os
 import sys
+import codecs
 import sqlite3
 
 from common import log
@@ -69,7 +70,7 @@ def init_people_file(directory):
         columns = [u'人物昵称', u'人物签名', u'人物标签', u'回答数', u'提问数', u'文章数', u'专栏数', u'想法数',
                    u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
                    u'关注问题', u'收藏夹', u'动态']
-        with open(path, 'w+') as f:
+        with codecs.open(path, 'w+', 'utf-8') as f:
             line = ','.join(columns)
             line += '\n'
             f.write(line)
@@ -88,7 +89,7 @@ def init_question_file(directory):
 
         columns = ['问题ID', '问题标题', '问题描述', '问题关注数', '问题浏览数', '问题评论数', 'URL', '回答文件']
 
-        with open(path, 'w+') as f:
+        with codecs.open(path, 'w+', 'utf-8') as f:
             line = ','.join(columns)
             line += '\n'
             f.write(line)
@@ -106,9 +107,8 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = init_people_file(dir_path)
         assert isinstance(content, Person), "use Person class instead of raw content"
-        with open(path, 'w+') as f:
-            f.write(content.to_csv_line())
-            f.write('\n')
+        with codecs.open(path, 'w+', 'utf-8') as f:
+            f.write(u'%s\n' % content.to_csv_line())
         logger.info('people saved!')
 
     elif content_type == 'question':
@@ -118,9 +118,8 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = init_question_file(dir_path)
         assert isinstance(content, Question), "use Question class instead of raw content"
-        with open(path, 'w+') as f:
-            f.write(content.to_csv_line())
-            f.write('\n')
+        with codecs.open(path, 'w+', 'utf-8') as f:
+            f.write(u'%s\n' % content.to_csv_line())
         logger.info('question saved')
 
     elif content_type == 'answers':
@@ -136,14 +135,14 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
         path = dir_path + content['filename']
 
-        with open(path, 'w+') as f:
+        with codecs.open(path, 'w+', 'utf-8') as f:
 
-            f.write('[Question]:%s\n' % content['content'])
-            f.write('[URL]:%s\n' % content['url'])
+            f.write(u'[Question]:%s\n' % content['content'])
+            f.write(u'[URL]:%s\n' % content['url'])
 
             answers = content['answers']
             for ans in answers:
-                f.write(ans)
+                f.write(u'%s\n' % ans)
 
         logger.info("answers saved")
 
@@ -155,15 +154,15 @@ def save_file(content_type, content):
             os.mkdir(dir_path)
 
         path = dir_path + 'topic_%s.csv' % content.topic_id
-        with open(path, 'w+') as f:
+        with codecs.open(path, 'w+', 'utf-8') as f:
 
-            f.write('标题,%s\n' % content.title)
-            f.write('类型,%s\n' % content.topic_type)
+            f.write(u'标题,%s\n' % content.title)
+            f.write(u'类型,%s\n' % content.topic_type)
 
-            f.write('问题,回答作者,回答内容,评论数\n')
+            f.write(u'问题,回答作者,回答内容,评论数\n')
             for question in content.questions:
 
-                f.write('%s,%s,%s,%s\n' % question)
+                f.write(u'%s,%s,%s,%s\n' % question)
 
         logger.info('topic saved')
 

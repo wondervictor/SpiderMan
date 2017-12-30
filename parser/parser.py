@@ -18,7 +18,7 @@ class SearchParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
@@ -286,22 +286,25 @@ class QuestionParser:
 
         answer_ = []
         for i in xrange(len(answer[0])):
-            ans_ = model.Answer(
-                question=question[0],
-                name=answer[0][i],
-                user_tag=answer[1][i],
-                content=answer[2][i],
-                ups=answer[3][i],
-                comments=answer[4][i]
-            )
-            answer_.append(ans_)
+            try:
+                ans_ = model.Answer(
+                    question=question[0],
+                    name=answer[0][i],
+                    user_tag=answer[1][i],
+                    content=answer[2][i],
+                    ups=answer[3][i],
+                    comments=answer[4][i]
+                )
+                answer_.append(ans_)
+            except IndexError:
+                break
 
         ans = dict()
         ans['filename'] = 'question_answers_%s.txt' % question[0]
         ans['url'] = question[6]
         ans['content'] = question[2]
         ans['answers'] = answer_
-        store.save_file('./result/question_answers/', 'answers', ans)
+        store.save_file('answers', ans)
         # with codecs.open('Question:'+question[0]+'.txt', 'w', 'utf-8')as f:
         #     f.write(u'问题标题:\t'+question[0]+'\n')
         #     f.write(u'问题描述:\t'+question[1]+'\n')
@@ -324,7 +327,7 @@ class PeopleParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
@@ -492,7 +495,7 @@ class TopicParser:
     text = None
 
     def __init__(self, text):
-        self.text = BS(text, 'lxml')
+        self.text = BS(text, 'html.parser')
 
     def clean(self, text):
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
