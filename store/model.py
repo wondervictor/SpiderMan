@@ -38,7 +38,7 @@ class Answer(object):
 
     def __str__(self):
 
-        s = "[回答者]:%s\n[回答者标签]:%s\n[内容]:%s\n[赞同数]:%s\n[评论数]:%s\n" % \
+        s = u"[回答者]:%s\n[回答者标签]:%s\n[内容]:%s\n[赞同数]:%s\n[评论数]:%s\n" % \
             (self.name, self.user_tag, self.content, self.ups, self.comments)
         return s
 
@@ -88,7 +88,7 @@ class Person(object):
         :return:
         """
         activity = ''
-        for i in xrange(len(self.activities[0])):
+        for i in xrange(min(len(self.activities[0]), len(self.activities[1]))):
             activity += self.activities[0][i] + ':' + self.activities[1][i] + '\n'
 
         line = ['%s'] * 19

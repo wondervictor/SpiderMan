@@ -164,6 +164,7 @@ class Worker(object):
 def crawl_func(s):
     return gethtml.get_html(s)
 
+
 def parse_func(content_type, content):
 
     return parser.parse_html(content_type, content)

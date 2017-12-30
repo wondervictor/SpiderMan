@@ -100,6 +100,8 @@ def check_urls(urls, bloom_filter):
 
     assert isinstance(bloom_filter, BloomFilter), "Use Bloom Filter"
 
+    print(type(urls))
+
     def preprocess(x):
         """
         www.zhihu.com/quesiotn/dqwfqg[?w=cw&fqw=]
@@ -108,7 +110,17 @@ def check_urls(urls, bloom_filter):
         """
         return x.split('?')[0]
 
-    urls = map(urls, preprocess)
+    urls = map(preprocess, urls)
+
+    pattern = '(http|https)://www.zhihu.com/.*?'
+
+    def match_(url):
+        if re.match(pattern, url, re.S) is None:
+            return False
+        return True
+
+    urls = filter(match_, urls)
+
     result = []
 
     for url in urls:
