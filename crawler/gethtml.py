@@ -43,8 +43,8 @@ def get_html(url, keyword=""):
             exec_path = 'crawler/phantomjs/phantomjs.exe'
         driver = webdriver.PhantomJS(exec_path,service_args=service_args)
         # # 设置超时时间
-        driver.implicitly_wait(30)
-        driver.set_page_load_timeout(30)
+        driver.implicitly_wait(50)
+        driver.set_page_load_timeout(40)
         #非问题页面需要登录知乎查看
         if url.find("question") == -1 :
             driver.get("https://www.zhihu.com")
