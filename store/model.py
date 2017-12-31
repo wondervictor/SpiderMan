@@ -82,7 +82,7 @@ class Person(object):
 
         self.activities = activities
 
-    def to_csv_line(self):
+    def to_line(self):
         """
         提供写入csv
         :return:
@@ -91,12 +91,8 @@ class Person(object):
         for i in xrange(min(len(self.activities[0]), len(self.activities[1]))):
             activity += self.activities[0][i] + ':' + self.activities[1][i] + '\n'
 
-        line = ['%s'] * 19
-        line = ','.join(line)
-        line = line % (self.name, self.signature, self.tag, self.answer_num, self.question_num,
-                       self.article_num, self.zhuanlan_num, self.thoughts_num, self.ups,
-                       self.thanks, self.collected, self.edits, self.following, self.followers,
-                       self.follow_topics, self.follow_zhuanlan, self.follow_questions, self.collection,activity)
+        return (self.name, self.signature, self.tag, self.answer_num, self.question_num, self.article_num,
+                self.thanks, self.collected, self.edits, self.following, self.followers,self.follow_topics,
+                self.follow_zhuanlan, self.follow_questions, self.collection, activity)
 
-        return line
 

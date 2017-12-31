@@ -24,6 +24,7 @@ urls = [
     'https://www.zhihu.com/question/26006703',
     'https://www.zhihu.com/roundtable/jiqixuexi',
     'https://www.zhihu.com/question/63883507/answer/227019715',
+    'https://www.zhihu.com/question/63883507',
     'https://www.zhihu.com/people/breaknever/activities',
     'www.baidu.com',
     'https://www.zhiha.com/dqwfq3/',
@@ -108,9 +109,13 @@ def check_urls(urls, bloom_filter):
         :param x:
         :return:
         """
-        return x.split('?')[0]
-
-    urls = map(preprocess, urls)
+        x = x.split('?')[0]
+        url_type = get_url_type(x)
+        if url_type == 'question':
+            url_id = get_url_id(x)
+            if x is not None:
+                return 'https://www.zhihu.com/question/%s' % url_id
+        return x
 
     pattern = '(http|https)://www.zhihu.com/.*?'
 
@@ -120,6 +125,8 @@ def check_urls(urls, bloom_filter):
         return True
 
     urls = filter(match_, urls)
+    urls = map(preprocess, urls)
+
 
     result = []
 

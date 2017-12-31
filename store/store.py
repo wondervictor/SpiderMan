@@ -105,10 +105,20 @@ def save_file(content_type, content):
         dir_path = './result/people/'
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
-        path = init_people_file(dir_path)
         assert isinstance(content, Person), "use Person class instead of raw content"
+        if content.name == '':
+            return
+        path = dir_path+'%s.txt' % content.name
+        # path = init_people_file(dir_path)
+
+        columns = [u'人物昵称', u'人物签名', u'人物标签', u'回答数', u'提问数', u'文章数', u'专栏数', u'想法数',
+                   u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
+                   u'关注问题', u'收藏夹', u'动态']
+        content = content.to_line()
+        line = [u'[%s]:%s' % (x, y) for (x,y) in zip(columns, content)]
+        line = '\n'.join(line)
         with codecs.open(path, 'a+', 'utf-8') as f:
-            f.write(u'%s\n' % content.to_csv_line())
+            f.write(line)
         logger.info('people saved!')
 
     elif content_type == 'question':
@@ -156,8 +166,8 @@ def save_file(content_type, content):
         path = dir_path + 'topic_%s.csv' % content.topic_id
         with codecs.open(path, 'a+', 'utf-8') as f:
 
-            f.write(u'标题,%s\n' % content.title)
-            f.write(u'类型,%s\n' % content.topic_type)
+            f.write(u'标题,%s,\n' % content.title)
+            f.write(u'类型,%s,\n' % content.topic_type)
 
             f.write(u'问题,回答作者,回答内容,评论数\n')
             for question in content.questions:

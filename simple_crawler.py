@@ -21,7 +21,7 @@ class Application(object):
 
     def __init__(self, parser, cralwer):
         self.logger = log.Logger('Application')
-        self.crawler_manager = smthread.SMThreadManager(max_threads=2, func=self._crawl)
+        self.crawler_manager = smthread.SMThreadManager(max_threads=4, func=self._crawl)
         self.parser_manager = smthread.SMThreadManager(max_threads=2, func=self._parse)
         self.login = login.Login()
         self.links_queue = Queue.Queue()

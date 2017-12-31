@@ -109,7 +109,7 @@ class Worker(object):
             self.logger.info("[Crawler] Finish crawling %s" % url)
         else:
             self.crawler_manager.do(url)
-            self.logger.warn("[Crawler] Crawler Failed %s" % url)
+            self.logger.error("[Crawler] Crawler Failed %s" % url)
 
     def _handle_content(self, content, content_type):
         """
@@ -129,7 +129,10 @@ class Worker(object):
         content_type = url_check.get_url_type(url)
         content_type, links, content = self._parser_func(content_type, content)
         if len(links):
-            self.links.put(links)
+            try:
+                self.links.put(links)
+            except Exception as e:
+                self.logger.error('[Parser] Put url exception %s' % e.message)
         self.logger.info("[Parser] Finish parsing %s" % url)
         self._handle_content(content, content_type)
 
@@ -199,8 +202,8 @@ def test_worker(ip):
     config = WorkerConfig(
         name='worker',
         task_batchsize=2,
-        crawler_threads=4,
-        parser_threads=4,
+        crawler_threads=8,
+        parser_threads=2,
         authkey=AUTH_KEY,
         address=(ip, 23333)
     )

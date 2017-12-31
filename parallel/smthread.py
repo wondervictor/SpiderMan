@@ -15,9 +15,13 @@ class SMThread(threading.Thread):
     def run(self):
 
         while True:
-            (func, args) = self.task_queue.get()
-            func(args)
-            self.task_queue.task_done()
+
+            try:
+                (func, args) = self.task_queue.get()
+                func(args)
+                self.task_queue.task_done()
+            except Exception as e:
+                print("[Thread Exception] %s" % e.message)
 
 
 class SMThreadManager(object):

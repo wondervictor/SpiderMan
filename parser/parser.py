@@ -330,6 +330,8 @@ class PeopleParser:
         self.text = BS(text, 'html.parser')
 
     def clean(self, text):
+        if text is None or len(text) == 0:
+            return ''
         return text.replace(' ', '').replace('\n', '').replace('\t', '')
 
     # 得到个人的信息
@@ -509,7 +511,16 @@ class TopicParser:
             title = ismatch.group(1)
         else:
             title = titles
-        return title
+
+        _id = data('link', rel='canonical')
+        if len(_id):
+            question_url = _id[0]['href']
+            _id = url_check.get_url_id(question_url)
+            if _id is None:
+                _id = title
+        else:
+            question_url = title
+        return title, _id
 
     # 热门回答
     # 得到信话题信息
@@ -571,7 +582,7 @@ class TopicParser:
         return [kata, url, questions, names, simpletext, comments]
 
     def total(self):
-        title = self.gettitle()
+        title, _id = self.gettitle()
         kind = self.getinformation()[0]
         url = self.getinformation()[1]
         questions = self.getinformation()[2]
@@ -580,7 +591,7 @@ class TopicParser:
         comments = self.getinformation()[5]
 
         topic = model.Topic(
-            topic_id='',
+            topic_id=_id,
             title=title,
             topic_type=kind,
             questions=questions,
