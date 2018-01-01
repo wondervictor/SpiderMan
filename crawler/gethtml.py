@@ -18,15 +18,18 @@ def get_html(url, keyword=""):
     try:
         url = url.split('/answer')[0]
         #print(len(keyword))
-        if len(keyword) > 1:
-            keywords = {'q': keyword}
-            r = requests.get(url, params=keywords, headers=headers)
-            url = url+"q="+keyword
-        else:
-            r = requests.get(url, headers=headers)
 
-        # r.raise_for_status()
-        # r.encoding = r.apparent_encoding
+        if url.find("zhihu.com/people") != -1 :
+            r = requests.get(url, headers=headers)
+            r.raise_for_status()
+            r.encoding = r.apparent_encoding
+            return r.text
+
+        if len(keyword) > 1:
+            #keywords = {'q': keyword}
+            #r = requests.get(url, params=keywords, headers=headers)
+            url = url+"q="+keyword
+
         # 需要提供运行机器上PhantomJS执行地址
         # host添加127.0.0.1 localhost
         service_args = []
