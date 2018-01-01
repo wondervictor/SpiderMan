@@ -6,6 +6,7 @@ from threading import Thread
 from parser import parser as htmlparse
 from crawler import gethtml
 from worker import Worker, WorkerConfig
+from sentiment_analysis import inference
 from simple_crawler import SpiderApplication
 
 AUTH_KEY = 'abc'
@@ -46,7 +47,7 @@ class LoginView(Frame):
             exit(-1)
         server_ip = self.server_entry.get()
         port = self.port_entry.get()
-        self.app.login(True, server_ip, port)
+        self.app.login(True, server_ip, int(port))
 
     def single(self):
         self.app.login(False)
@@ -55,15 +56,40 @@ class LoginView(Frame):
 class MainView(Frame):
 
     def __init__(self, app, master=None):
-        Frame.__init__(self, master, width=600, height=400, bg='gray')
-        self.main_frame = Frame(width=600, height=400, bg='gray')
-        self.main_frame.pack()
+        Frame.__init__(self, master, width=900, height=500, bg='gray')
+
         self.app = app
+        self.pack()
 
-        self.left_center = Frame(width=300, height=300, bg='white')
+        self.sb = Scrollbar(self, orient=VERTICAL, width=5, bg='white')
+        self.logger = Text(self, width=62)
 
-        self.right_center = Frame(width=300, height=200, bg='white')
-        self.right_down = Frame(width=300, height=100, bg='white')
+        self.logger.config(yscrollcommand=self.sb.set)
+        self.sb.config(command=self.logger.yview)
+        self.sb.pack(side=RIGHT, fill=Y)
+
+        self.counter_text = Text(self, width=60, height=20)
+        self.input_text = Text(self, width=60, height=10)
+        self.button = Button(self, text='情感分析', command=self.sentiment_button)
+        self.logger.pack(side=LEFT, fill=BOTH)
+        self.counter_text.pack(padx=5)
+        self.input_text.pack(padx=5, pady=5)
+        self.button.pack(fill=X)
+        self.logger.configure(state='disabled')
+        self.counter_text.configure(state='disabled')
+
+    def write_log(self, log_type, message):
+
+        self.logger.configure(state='normal')
+        if log_type == 'warn':
+            color = 'orange'
+        elif log_type == 'info':
+            color = 'green'
+        else:
+            color = 'red'
+        self.logger.insert(END, message, color)
+        self.logger.see(END)
+        self.logger.configure(state='disabled')
 
     def update_info(self, info):
         """
@@ -71,8 +97,29 @@ class MainView(Frame):
         :param info:
         :return:
         """
+        self.counter_text.configure(state='normal')
 
-        
+        self.counter_text.delete(0.0, END)
+        self.counter_text.insert(END, '爬虫状态：\n', 'green')
+        self.counter_text.insert(END, '用户数：%s\n' % info['user'], 'black')
+        self.counter_text.insert(END, '问题数：%s\n' % info['question'], 'black')
+        self.counter_text.insert(END, '答案数：%s\n' % info['answer'], 'black')
+        self.counter_text.insert(END, '话题数：%s\n' % info['topic'], 'black')
+        self.counter_text.configure(state='disabled')
+
+    def sentiment_button(self):
+        content = self.input_text.get("1.0", END)
+        senti, prob = inference.inference(content)
+        if senti:
+            tkMessageBox.showinfo('情感分析', '情感分析结果：正面，置信度：%s' % prob, parent=self.app.root)
+
+        else:
+            if prob != 0:
+                tkMessageBox.showinfo('情感分析', '情感分析结果：负面，置信度：%s' % prob, parent=self.app.root)
+
+            else:
+                tkMessageBox.showinfo('情感分析', '情感分析结果：中性', parent=self.app.root)
+        self.input_text.delete(0.0, END)
 
 
 def crawl_func(s):
@@ -85,14 +132,19 @@ def parse_func(content_type, content):
 
 
 class Logger(object):
+
+    def __init__(self, handle):
+        self.handle = handle
+
     def warn(self, message):
-        pass
+        self.handle.write_log('warn', message)
 
     def info(self, message):
-        pass
+        self.handle.write_log('info', message)
 
-    def info(self, message):
-        pass
+    def error(self, message):
+        self.handle.write_log('error', message)
+
 
 class Application(object):
 
@@ -101,7 +153,7 @@ class Application(object):
         self.root.wm_attributes('-topmost', 1)
         self.current_view = None
         self.worker = None
-        self.logger = Logger()
+        self.logger = None
         self.worker_thread = None
 
     def _resize_window(self, width, height):
@@ -121,6 +173,10 @@ class Application(object):
 
     def login(self, is_distributed, ip="", port=0):
 
+        self.current_view.destroy()
+        self._resize_window(900, 500)
+        self.current_view = MainView(self)
+        self.logger = Logger(self.current_view)
         if is_distributed:
             config = WorkerConfig(
                 name='worker',
@@ -145,10 +201,7 @@ class Application(object):
                 logger=self.logger,
                 update_callback=self.update_func
             )
-
-        self.current_view.destroy()
-        self._resize_window(600, 400)
-        self.current_view = MainView(self)
+        # self.root.mainloop()
         self.worker_thread = Thread(target=self.worker.run)
         self.worker_thread.start()
 
