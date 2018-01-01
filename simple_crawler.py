@@ -26,7 +26,7 @@ class SpiderApplication(object):
         else:
             self.logger = logger
         self.update_callback = update_callback
-        self.crawler_manager = smthread.SMThreadManager(max_threads=4, func=self._crawl)
+        self.crawler_manager = smthread.SMThreadManager(max_threads=8, func=self._crawl)
         self.parser_manager = smthread.SMThreadManager(max_threads=2, func=self._parse)
         self.login = login.Login()
         self.links_queue = Queue.Queue()
@@ -60,7 +60,8 @@ class SpiderApplication(object):
         if len(links):
             self.links_queue.put(links)
         store.save_file(content_type, content)
-        self.update_callback(content_type)
+        if self.update_callback:
+            self.update_callback(content_type)
         self.logger.info("[Parser] Finish parsing %s" % url)
 
     def _crawl(self, url):
@@ -79,15 +80,17 @@ class SpiderApplication(object):
 
     def run(self):
         urls = [
-            'https://www.zhihu.com/question/26006703',
-            'https://www.zhihu.com/topic',
-            'https://www.zhihu.com/topic/19565870',
-            'https://www.zhihu.com/topic/19550355',
-            'https://www.zhihu.com/question/264580669',
-            'https://www.zhihu.com/people/webto/',
-            'https://www.zhihu.com/question/29130226/answer/284394337',
-            'https://www.zhihu.com/question/30943322',
-            'https://www.zhihu.com/question/52253320/answer/284550438',
+            'https://www.zhihu.com/search?type=content&q=%E6%9C%AA%E9%97%BB%E8%8A%B1%E5%90%8D'
+
+            # 'https://www.zhihu.com/question/26006703',
+            # 'https://www.zhihu.com/topic',
+            # 'https://www.zhihu.com/topic/19565870',
+            # 'https://www.zhihu.com/topic/19550355',
+            # 'https://www.zhihu.com/question/264580669',
+            # 'https://www.zhihu.com/people/webto/',
+            # 'https://www.zhihu.com/question/29130226/answer/284394337',
+            # 'https://www.zhihu.com/question/30943322',
+            # 'https://www.zhihu.com/question/52253320/answer/284550438',
         ]
         self.start(urls)
 
@@ -110,15 +113,16 @@ def main():
 
     app = SpiderApplication(_parser, _get_html)
     urls = [
-        'https://www.zhihu.com/question/26006703',
-        'https://www.zhihu.com/topic',
-        'https://www.zhihu.com/topic/19565870',
-        'https://www.zhihu.com/topic/19550355',
-        'https://www.zhihu.com/question/264580669',
-        'https://www.zhihu.com/people/webto/',
-        'https://www.zhihu.com/question/29130226/answer/284394337',
-        'https://www.zhihu.com/question/30943322',
-        'https://www.zhihu.com/question/52253320/answer/284550438',
+        'https://www.zhihu.com/search?type=content&q=%E6%9C%AA%E9%97%BB%E8%8A%B1%E5%90%8D'
+        # 'https://www.zhihu.com/question/26006703',
+        # 'https://www.zhihu.com/topic',
+        # 'https://www.zhihu.com/topic/19565870',
+        # 'https://www.zhihu.com/topic/19550355',
+        # 'https://www.zhihu.com/question/264580669',
+        # 'https://www.zhihu.com/people/webto/',
+        # 'https://www.zhihu.com/question/29130226/answer/284394337',
+        # 'https://www.zhihu.com/question/30943322',
+        # 'https://www.zhihu.com/question/52253320/answer/284550438',
     ]
     app.start(urls)
 

@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import re
+import os
 import sys
 import codecs
 sys.path.append('../')
@@ -141,22 +142,26 @@ class SearchParser:
         zhuanlan = self.getzhuanlan()
         content = self.getcontent()
         url = self.geturl()
-        with codecs.open('Search:'+question+'.txt', 'w', 'utf-8')as f:
-            f.write(u'搜索的问题：\t'+question+'\n')
-            if live:
-                f.write(u'知乎live:\t'+live[1]+'\n')
-            if topic:
-                f.write(u'知乎话题:\t'+topic[1]+'\n')
-            if zhuanlan:
-                f.write(u'知乎专栏:\t'+zhuanlan[1]+'\n')
-            for i in range(len(content[1])):
-                f.write('\n'+u'回答标题:\t'+content[1][i]+'\n')
-                f.write(u'作者:\t\t'+content[2][i]+'\n')
-                f.write(u'回答简述:\t'+content[3][i]+'\n')
-                f.write(u'赞同数:\t\t'+content[4][i]+'\n')
-                f.write(u'评论数:\t\t'+content[5][i]+'\n')
+        path = 'result/search/'
+        if not os.path.exists(path):
+            os.mkdir(path)
 
-        return url
+        with codecs.open(path+'%s.txt' % question, 'w', 'utf-8')as f:
+            f.write(u'[搜索的问题]:\t'+question+'\n')
+            if live:
+                f.write(u'[知乎live]:'+live[1]+'\n')
+            if topic:
+                f.write(u'[知乎话题]:'+topic[1]+'\n')
+            if zhuanlan:
+                f.write(u'[知乎专栏]:'+zhuanlan[1]+'\n')
+            for i in range(len(content[1])):
+                f.write('\n'+u'[回答标题]:'+content[1][i]+'\n')
+                f.write(u'[作者]:'+content[2][i]+'\n')
+                f.write(u'[回答简述]'+content[3][i]+'\n')
+                f.write(u'[赞同数]:'+content[4][i]+'\n')
+                f.write(u'[评论数]:'+content[5][i]+'\n')
+
+        return 'search', url, None
 
 
 # re.compile(r'(http|https)://www.zhihu.com/question.*?').match(url):
@@ -270,7 +275,7 @@ class QuestionParser:
         question = self.getquestion()
         answer = self.getanswer()
         url = self.geturl()
-        print(question)
+        # print(question)
 
         # [question_id, question, content, follows, views, comment, question_url]
         question_ = model.Question(

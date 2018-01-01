@@ -177,6 +177,9 @@ def save_file(content_type, content):
 
         logger.info('topic saved')
 
+    else:
+        pass
+
 
 
 

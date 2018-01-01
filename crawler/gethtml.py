@@ -120,7 +120,6 @@ def get_html(url, keyword=""):
         driver.quit()
         return html
     except:
-        print ("crawl failed")
         return None
 
 

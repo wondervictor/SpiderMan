@@ -71,7 +71,8 @@ class Worker(object):
         :return:
         """
         store.save_file(content_type, content)
-        self.update_callback(content_type)
+        if self.update_callback:
+            self.update_callback(content_type)
 
     def _parse(self, args):
         """

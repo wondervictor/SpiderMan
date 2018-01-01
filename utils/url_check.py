@@ -41,13 +41,15 @@ urls = [
 
 """
 
+
 def get_url_type(url):
     """
     https://www.zhihu.com/xxxxx/1231234/xwf3qwrvq
     :param url:
     :return: xxxxxxx
     """
-    s = url.replace('//', 'a')
+    x = url.split('?')[0]
+    s = x.replace('//', 'a')
     s = s.split('/')
     if len(s) < 2:
         return None
@@ -61,7 +63,8 @@ def get_url_id(url):
     :param url:
     :return: xxxxxxx
     """
-    s = url.replace('//', 'a')
+    x = url.split('?')[0]
+    s = x.replace('//', 'a')
     s = s.split('/')
     if len(s) < 3:
         return None
