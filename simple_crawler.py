@@ -17,10 +17,12 @@ from utils import url_check
 from parallel import smthread
 
 
-class Application(object):
+class SpiderApplication(object):
 
-    def __init__(self, parser, cralwer):
-        self.logger = log.Logger('Application')
+    def __init__(self, parser, cralwer, logger=None, update_callback=None):
+        if logger is None:
+            self.logger = log.Logger('Application')
+        self.update_callback = update_callback
         self.crawler_manager = smthread.SMThreadManager(max_threads=4, func=self._crawl)
         self.parser_manager = smthread.SMThreadManager(max_threads=2, func=self._parse)
         self.login = login.Login()
@@ -55,6 +57,7 @@ class Application(object):
         if len(links):
             self.links_queue.put(links)
         store.save_file(content_type, content)
+        self.update_callback(content_type)
         self.logger.info("[Parser] Finish parsing %s" % url)
 
     def _crawl(self, url):
@@ -71,6 +74,20 @@ class Application(object):
             self.crawler_manager.do(url)
             self.logger.warn("[Crawler] Crawler Failed %s" % url)
 
+    def run(self):
+        urls = [
+            'https://www.zhihu.com/question/26006703',
+            'https://www.zhihu.com/topic',
+            'https://www.zhihu.com/topic/19565870',
+            'https://www.zhihu.com/topic/19550355',
+            'https://www.zhihu.com/question/264580669',
+            'https://www.zhihu.com/people/webto/',
+            'https://www.zhihu.com/question/29130226/answer/284394337',
+            'https://www.zhihu.com/question/30943322',
+            'https://www.zhihu.com/question/52253320/answer/284550438',
+        ]
+        self.start(urls)
+
 
 def _parser(content_type, content):
 
@@ -84,7 +101,7 @@ def _get_html(url):
 
 def main():
 
-    app = Application(_parser, _get_html)
+    app = SpiderApplication(_parser, _get_html)
     urls = [
         'https://www.zhihu.com/question/26006703',
         'https://www.zhihu.com/topic',
@@ -99,5 +116,5 @@ def main():
     app.start(urls)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

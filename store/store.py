@@ -115,7 +115,7 @@ def save_file(content_type, content):
                    u'总赞同数', u'总感谢数', u'总收藏数', u'总编辑数', u'总关注数', u'被关注数', u'关注话题', u'关注专栏',
                    u'关注问题', u'收藏夹', u'动态']
         content = content.to_line()
-        line = [u'[%s]:%s' % (x, y) for (x,y) in zip(columns, content)]
+        line = [u'[%s]:%s' % (x, y) for (x, y) in zip(columns, content)]
         line = '\n'.join(line)
         with codecs.open(path, 'a+', 'utf-8') as f:
             f.write(line)
@@ -127,7 +127,9 @@ def save_file(content_type, content):
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
         path = init_question_file(dir_path)
+        # path = dir_path + 'question.txt'
         assert isinstance(content, Question), "use Question class instead of raw content"
+
         with codecs.open(path, 'a+', 'utf-8') as f:
             f.write(u'%s\n' % content.to_csv_line())
         logger.info('question saved')
@@ -163,16 +165,15 @@ def save_file(content_type, content):
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
 
-        path = dir_path + 'topic_%s.csv' % content.topic_id
+        path = dir_path + 'topic_%s.txt' % content.topic_id
         with codecs.open(path, 'a+', 'utf-8') as f:
 
-            f.write(u'标题,%s,\n' % content.title)
-            f.write(u'类型,%s,\n' % content.topic_type)
+            f.write(u'[标题]%s\n' % content.title)
+            f.write(u'[类型]%s\n' % content.topic_type)
 
-            f.write(u'问题,回答作者,回答内容,评论数\n')
             for question in content.questions:
 
-                f.write(u'%s,%s,%s,%s\n' % question)
+                f.write(u'[问题]:%s\n[回答作者]%s\n[回答内容]:%s\n[评论数]:%s\n\n' % question)
 
         logger.info('topic saved')
 

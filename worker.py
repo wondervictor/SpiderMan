@@ -72,11 +72,12 @@ class Master(object):
 
 class Worker(object):
 
-    def __init__(self, config, crawler_func, parser_func):
+    def __init__(self, config, crawler_func, parser_func, logger=None, update_callback=None):
 
         # log
-        self.logger = log.Logger('Worker')
-
+        if logger is None:
+            self.logger = log.Logger('Worker')
+        self.update_callback = update_callback
         # self.task_queue = Queue.Queue()
         # self.link_queue = Queue.Queue()
         self._init_environment()
@@ -118,6 +119,7 @@ class Worker(object):
         :return:
         """
         store.save_file(content_type, content)
+        self.update_callback(content_type)
 
     def _parse(self, args):
         """
@@ -213,17 +215,17 @@ def test_worker(ip):
     worker.run()
 
 
-if __name__ == '__main__':
-    multiprocessing.current_process().authkey = AUTH_KEY
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--worker', type=int, default=1, help='worker node')
-    parser.add_argument('--master_ip', type=str, default='0.0.0.0', help='Master IP')
-
-    args = parser.parse_args()
-
-    if args.worker == 1:
-        test_worker(args.master_ip)
-    else:
-        test_master()
+# if __name__ == '__main__':
+#     multiprocessing.current_process().authkey = AUTH_KEY
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--worker', type=int, default=1, help='worker node')
+#     parser.add_argument('--master_ip', type=str, default='0.0.0.0', help='Master IP')
+#
+#     args = parser.parse_args()
+#
+#     if args.worker == 1:
+#         test_worker(args.master_ip)
+#     else:
+#         test_master()
 
 
