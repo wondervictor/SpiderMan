@@ -3,6 +3,8 @@
 from Tkinter import *
 import tkMessageBox
 from threading import Thread
+
+from common import common
 from parser import parser as htmlparse
 from crawler import gethtml
 from worker import Worker, WorkerConfig
@@ -65,6 +67,10 @@ class MainView(Frame):
         self.logger = Text(self, width=62)
 
         self.logger.config(yscrollcommand=self.sb.set)
+        self.logger.tag_config('green', foreground='#008B00')
+        self.logger.tag_config('red', foreground='#E74C3C')
+        self.logger.tag_config('orange', foreground='#F1C40F')
+
         self.sb.config(command=self.logger.yview)
         self.sb.pack(side=RIGHT, fill=Y)
 
@@ -87,7 +93,7 @@ class MainView(Frame):
             color = 'green'
         else:
             color = 'red'
-        self.logger.insert(END, message, color)
+        self.logger.insert(END, message + '\n', color)
         self.logger.see(END)
         self.logger.configure(state='disabled')
 
@@ -103,7 +109,6 @@ class MainView(Frame):
         self.counter_text.insert(END, '爬虫状态：\n', 'green')
         self.counter_text.insert(END, '用户数：%s\n' % info['user'], 'black')
         self.counter_text.insert(END, '问题数：%s\n' % info['question'], 'black')
-        self.counter_text.insert(END, '答案数：%s\n' % info['answer'], 'black')
         self.counter_text.insert(END, '话题数：%s\n' % info['topic'], 'black')
         self.counter_text.configure(state='disabled')
 
@@ -136,14 +141,19 @@ class Logger(object):
     def __init__(self, handle):
         self.handle = handle
 
+    def get_timestr(self):
+        timestamp = common.get_timestamp()
+        date_str = common.time_to_str(timestamp)
+        return date_str
+
     def warn(self, message):
-        self.handle.write_log('warn', message)
+        self.handle.write_log('warn', self.get_timestr()+'[WARN]'+message)
 
     def info(self, message):
-        self.handle.write_log('info', message)
+        self.handle.write_log('info', self.get_timestr()+'[INFO]'+message)
 
     def error(self, message):
-        self.handle.write_log('error', message)
+        self.handle.write_log('error', self.get_timestr()+'[ERROR]'+message)
 
 
 class Application(object):
@@ -155,6 +165,11 @@ class Application(object):
         self.worker = None
         self.logger = None
         self.worker_thread = None
+        self.state_dict = dict()
+        self.state_dict['user'] = 0
+        self.state_dict['question'] = 0
+        self.state_dict['topic'] = 0
+        self.root.protocol('WM_DELETE_WINDOW', self.on_closing)
 
     def _resize_window(self, width, height):
         screenwidth = self.root.winfo_screenwidth()
@@ -169,7 +184,14 @@ class Application(object):
         self.root.mainloop()
 
     def update_func(self, content_type):
-        pass
+        if content_type == 'people':
+            self.state_dict['user'] += 1
+        elif content_type == 'question':
+            self.state_dict['question'] += 1
+        else:
+            self.state_dict['topic'] += 1
+
+        self.current_view.update_info(self.state_dict)
 
     def login(self, is_distributed, ip="", port=0):
 
@@ -203,7 +225,14 @@ class Application(object):
             )
         # self.root.mainloop()
         self.worker_thread = Thread(target=self.worker.run)
+        self.worker_thread.daemon = True
         self.worker_thread.start()
+
+    def on_closing(self):
+        if tkMessageBox.askyesno("Quit", "Do you want to quit?", parent=self.root):
+            self.worker.exit_app()
+            self.root.destroy()
+            exit(0)
 
 
 if __name__ == '__main__':

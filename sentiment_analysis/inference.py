@@ -15,3 +15,6 @@ def inference(sentence):
         return False, 0
 
 
+def inference_answers(filepath):
+    
+    pass

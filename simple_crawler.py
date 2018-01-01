@@ -20,8 +20,11 @@ from parallel import smthread
 class SpiderApplication(object):
 
     def __init__(self, parser, cralwer, logger=None, update_callback=None):
+
         if logger is None:
             self.logger = log.Logger('Application')
+        else:
+            self.logger = logger
         self.update_callback = update_callback
         self.crawler_manager = smthread.SMThreadManager(max_threads=4, func=self._crawl)
         self.parser_manager = smthread.SMThreadManager(max_threads=2, func=self._parse)
@@ -87,6 +90,10 @@ class SpiderApplication(object):
             'https://www.zhihu.com/question/52253320/answer/284550438',
         ]
         self.start(urls)
+
+    def exit_app(self):
+
+        exit(0)
 
 
 def _parser(content_type, content):
