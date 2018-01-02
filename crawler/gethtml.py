@@ -31,7 +31,6 @@ def get_html(url, keyword=""):
             url = url+"q="+keyword
 
         # 需要提供运行机器上PhantomJS执行地址
-        # host添加127.0.0.1 localhost
         service_args = []
         # 关闭图片加载
         service_args.append('--load-images=no')
@@ -112,7 +111,7 @@ def get_html(url, keyword=""):
         # html = driver.page_source
         # print(html)
         driver.get(url)
-        time.sleep(0.5)
+        time.sleep(1)
         for i in range(5):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)

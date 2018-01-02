@@ -96,9 +96,9 @@ class Login(object):
         # 通过查看用户个人信息来判断是否已经登录
         url = "https://www.zhihu.com/settings/profile"
         login_code = self._session.get(url, headers=headers, allow_redirects=False).status_code
-        # profileresponse = self._session.get(url, headers=headers, allow_redirects=False)
-        # profilesoup = BeautifulSoup(profileresponse.text, 'html.parser')
-        # print (profileresponse.text)
+        # profile_response = self._session.get(url, headers=headers, allow_redirects=False)
+        # profile_soup = BeautifulSoup(profile_response.text, 'html.parser')
+        # print (profile_response.text)
         if login_code == 200:
             return True
         else:
@@ -112,7 +112,7 @@ class Login(object):
         if re.match(r"^1\d{10}$", account):
             print("手机号登录 \n")
             post_url = 'https://www.zhihu.com/login/phone_num'
-            postdata = {
+            post_data = {
                 '_xsrf': _xsrf,
                 'phone_num': account,
                 'password': secret,
@@ -125,23 +125,23 @@ class Login(object):
                 print("你的账号输入有问题，请重新登录")
                 return
             post_url = 'https://www.zhihu.com/login/email'
-            postdata = {
+            post_data = {
                 '_xsrf': _xsrf,
                 'email': account,
                 'password': secret,
                 'captcha_cn': 'cn'
             }
         # 不需要验证码直接登录成功
-        loginresponse = self._session.post(url=post_url, headers=headers, data=postdata)
-        loginresponse.encoding = loginresponse.apparent_encoding
-        print('loginresponse', loginresponse.status_code)
-        # print(loginresponse.json())
+        login_response = self._session.post(url=post_url, headers=headers, data=post_data)
+        login_response.encoding = login_response.apparent_encoding
+        print('loginresponse', login_response.status_code)
+        # print(login_response.json())
         # 验证码问题输入导致失败: 猜测这个问题是由于session中对于验证码的请求过期导致
-        while loginresponse.json()['r'] == 1:
+        while login_response.json()['r'] == 1:
             # 不输入验证码登录失败
             # 使用需要输入验证码的方式登录
-            postdata["captcha"] = self._get_captcha()
-            login_page = self._session.post(post_url, data=postdata, headers=headers)
+            post_data["captcha"] = self._get_captcha()
+            login_page = self._session.post(post_url, data=post_data, headers=headers)
             login_code = login_page.json()
             print(login_code['msg'])
         # 保存 cookies 到文件，

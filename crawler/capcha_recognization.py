@@ -17,101 +17,101 @@ img_width, img_height = 60, 30
 
 crop_weights = './cropWeights.h5'
 class_weights = './classWeights.h5'
-crop_model = './cropModel.h5'
-class_model = './classModel.h5'
+_crop_model = './cropModel.h5'
+_class_model = './classModel.h5'
 nb_train_samples = 100
 nb_validation_samples = 10
 nb_epoch = 3000
-mapList = ['3', '5', '6','7','8','9','A','B','D','E','F','G','H','J','K','M','N','P','R','S','T','U','V','X','Y']
-mapArray = np.array(mapList)
+map_list = ['3', '5', '6','7','8','9','A','B','D','E','F','G','H','J','K','M','N','P','R','S','T','U','V','X','Y']
+map_array = np.array(map_list)
 
 
 def crop(im):
     step = 1
-    boxList = []
+    box_list = []
     for i in range(121):
-        boxList.append((step*i, 0, 30+step*i, 60))
+        box_list.append((step*i, 0, 30+step*i, 60))
     if not os.path.exists('./captchaTemp/data'):
         os.mkdir('captchaTemp')
         os.mkdir('./captchaTemp/data')
     count = 0
-    for each in boxList:
+    for each in box_list:
         region = im.crop(each)
         region.save('captchaTemp/data/' + str(count) + '.png')
         count += 1
 
 
-def predict(cropModel,classModel):
-    datagenCrop = ImageDataGenerator(rescale=1./255, zca_whitening=True)
-    datagenClass = ImageDataGenerator(rescale=1./255, zca_whitening=True)
-    cropGenerator = datagenCrop.flow_from_directory(
+def predict(crop_model, class_model):
+    date_gen_crop = ImageDataGenerator(rescale=1./255, zca_whitening=True)
+    date_gen_class = ImageDataGenerator(rescale=1./255, zca_whitening=True)
+    crop_generator = date_gen_crop.flow_from_directory(
         'captchaTemp',
         color_mode='grayscale',
         shuffle=False,
         target_size=(60,30))
-    cropFilenames = cropGenerator.filenames
-    predictCrop = cropModel.predict_generator(cropGenerator,121)
+    crop_file_names = crop_generator.filenames
+    predict_crop = crop_model.predict_generator(crop_generator,121)
     # sorting images
     maping = []
-    for imName in cropFilenames:
+    for imName in crop_file_names:
         maping.append(int(re.sub('\D*','',imName)))
-    goodArr = predictCrop[:,1]
-    print('predictCrop: {}'.format(goodArr))
-    index = np.argsort(goodArr).tolist()
+    good_arr = predict_crop[:,1]
+    print('predict_crop: {}'.format(good_arr))
+    index = np.argsort(good_arr).tolist()
     print(len(index))
-    print(len(goodArr))
-    finalIndex = [maping[p] for p in index]
+    print(len(good_arr))
+    final_index = [maping[p] for p in index]
     index = []
-    index = finalIndex
+    index = final_index
     print('index: {}'.format(index))
     target = index[-5:-1]
     print('target: {}'.format(target))
     index = index[:-4]
-    checkAndReplace(index, target, 18)
+    check_and_replace(index, target, 18)
     target.sort()
     if os.path.exists('./tobe_classfied'):
         shutil.rmtree('./tobe_classfied')
     os.mkdir('tobe_classfied')
     os.mkdir('./tobe_classfied/data')
-    imList = []
+    im_list = []
     for each in target:
-        imList.append(str(each) + '.png')
-    print(imList)
-    for each in imList:
+        im_list.append(str(each) + '.png')
+    print(im_list)
+    for each in im_list:
         temp = Image.open('./captchaTemp/data/' + each)
         temp.save('./tobe_classfied/data/' + each)
-    classGenerator = datagenClass.flow_from_directory(
+    class_generator = date_gen_class.flow_from_directory(
         'tobe_classfied',
         color_mode='grayscale',
         shuffle=False,
         target_size=(60,30))
-    predictClass = classModel.predict_generator(classGenerator,4)
-    classFilenames = classGenerator.filenames
-    sortedFilenames = os.listdir('./tobe_classfied/data')
-    sortedFilenames.sort(key=lambda x : int(x[:-4]))
-    print('predictLcass: {}'.format(predictClass))
-    print('classFilenames:{}'.format(classFilenames))
-    print('sortedFilenames:{}'.format(sortedFilenames))
-    classIndex = []
+    predict_class = class_model.predict_generator(class_generator,4)
+    class_file_names = class_generator.filenames
+    sorted_file_names = os.listdir('./tobe_classfied/data')
+    sorted_file_names.sort(key=lambda x : int(x[:-4]))
+    print('predictLcass: {}'.format(predict_class))
+    print('class_file_names:{}'.format(class_file_names))
+    print('sorted_file_names:{}'.format(sorted_file_names))
+    class_index = []
     temp = [0,0,0,0]
-    result = predictClass.argmax(axis = 1)
+    result = predict_class.argmax(axis = 1)
     result.tolist()
     print('result:{}'.format(result))
-    for each in classFilenames:
-        classIndex.append(sortedFilenames.index(os.path.basename(each)))
-    for each in classIndex:
-        temp[each] = result[classIndex.index(each)]
+    for each in class_file_names:
+        class_index.append(sorted_file_names.index(os.path.basename(each)))
+    for each in class_index:
+        temp[each] = result[class_index.index(each)]
     result = temp
     print('result: {}'.format(result))
-    finalClass = mapArray[result]
-    print(finalClass)
-    finalClass.tolist()
-    captcha = ''.join(finalClass)
+    final_class = map_array[result]
+    print(final_class)
+    final_class.tolist()
+    captcha = ''.join(final_class)
     print('captcha:{}'.format(captcha))
     return captcha
 
 
-def checkAndReplace(index,target,distance):
+def check_and_replace(index,target,distance):
     state = 1
     for i in range(0,len(target)-1):
         for j in range(i+1,len(target)):
@@ -138,8 +138,8 @@ def checkAndReplace(index,target,distance):
 
 
 if __name__ == '__main__':
-    cropModel = load_model(crop_model)
-    classModel = load_model(class_model)
+    crop_model = load_model(_crop_model)
+    class_model = load_model(_class_model)
     im = Image.open('captcha.jpg')
     crop(im)
-    capcha = predict(cropModel, classModel)
+    verify = predict(crop_model, class_model)
