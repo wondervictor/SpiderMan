@@ -44,3 +44,4 @@ def inference_answers(filepath, save_path):
     with codecs.open(save_path, 'a+') as f:
         f.write(content)
 
+

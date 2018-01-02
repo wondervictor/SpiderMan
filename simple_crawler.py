@@ -80,7 +80,8 @@ class SpiderApplication(object):
 
     def run(self):
         urls = [
-            'https://www.zhihu.com/search?type=content&q=%E6%9C%AA%E9%97%BB%E8%8A%B1%E5%90%8D'
+            'https://www.zhihu.com/search?q=%E5%8D%8E%E4%B8%AD%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%3D&type=content'
+            #'https://www.zhihu.com/search?type=content&q=%E6%9C%AA%E9%97%BB%E8%8A%B1%E5%90%8D'
 
             # 'https://www.zhihu.com/question/26006703',
             # 'https://www.zhihu.com/topic',
@@ -113,7 +114,7 @@ def main():
 
     app = SpiderApplication(_parser, _get_html)
     urls = [
-        'https://www.zhihu.com/search?type=content&q=%E6%9C%AA%E9%97%BB%E8%8A%B1%E5%90%8D'
+        'https://www.zhihu.com/search?q=%E5%8D%8E%E4%B8%AD%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%3D&type=content'
         # 'https://www.zhihu.com/question/26006703',
         # 'https://www.zhihu.com/topic',
         # 'https://www.zhihu.com/topic/19565870',

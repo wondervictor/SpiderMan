@@ -305,6 +305,9 @@ class QuestionParser:
                 break
 
         ans = dict()
+
+        # print('问题：%s' % question[2])
+        # print('url:%s' % question[6])
         ans['filename'] = 'question_answers_%s.txt' % question[0]
         ans['url'] = question[6]
         ans['content'] = question[2]
