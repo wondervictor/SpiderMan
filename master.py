@@ -61,19 +61,20 @@ class Master(object):
                 continue
 
 
-def test_master():
+def test_master(url):
 
     master = Master(('0.0.0.0', 23333), AUTH_KEY)
     urls = [
-        'https://www.zhihu.com/question/26006703',
-        'https://www.zhihu.com/topic',
-        'https://www.zhihu.com/topic/19565870',
-        'https://www.zhihu.com/topic/19550355',
-        'https://www.zhihu.com/question/264580669',
-        'https://www.zhihu.com/people/webto/',
-        'https://www.zhihu.com/question/29130226/answer/284394337',
-        'https://www.zhihu.com/question/30943322',
-        'https://www.zhihu.com/question/52253320/answer/284550438',
+        url
+        # 'https://www.zhihu.com/question/26006703',
+        # 'https://www.zhihu.com/topic',
+        # 'https://www.zhihu.com/topic/19565870',
+        # 'https://www.zhihu.com/topic/19550355',
+        # 'https://www.zhihu.com/question/264580669',
+        # 'https://www.zhihu.com/people/webto/',
+        # 'https://www.zhihu.com/question/29130226/answer/284394337',
+        # 'https://www.zhihu.com/question/30943322',
+        # 'https://www.zhihu.com/question/52253320/answer/284550438',
     ]
     master.start(urls)
     master.run()
@@ -81,5 +82,10 @@ def test_master():
 
 if __name__ == '__main__':
     multiprocessing.current_process().authkey = AUTH_KEY
-    test_master()
 
+    print("Master is starting to run ....")
+    keyword = raw_input("Please enter a keyword to search:")
+
+    url = 'https://www.zhihu.com/search?type=content&q=%s' % keyword
+    print("Your First URL is: %s" % url)
+    test_master(url)
