@@ -45,8 +45,8 @@ def get_html(url, keyword=""):
             exec_path = 'crawler/phantomjs/phantomjs.exe'
         driver = webdriver.PhantomJS(exec_path,service_args=service_args)
         # # 设置超时时间
-        driver.implicitly_wait(50)
-        driver.set_page_load_timeout(40)
+        driver.implicitly_wait(20)
+        driver.set_page_load_timeout(20)
         #非问题页面需要登录知乎查看
         if url.find("question") == -1 :
             driver.get("https://www.zhihu.com")
@@ -62,10 +62,10 @@ def get_html(url, keyword=""):
                     # print(name)
                     # print(value)
                     driver.add_cookie({
-                    'name': name,
-                    'value': value,
-                    'path':'/',
-                    'domain': '.zhihu.com',
+                     'name': name,
+                     'value': value,
+                     'path':'/',
+                     'domain': '.zhihu.com',
                      })
             except:
                  # pass
@@ -112,10 +112,15 @@ def get_html(url, keyword=""):
         # print(html)
         driver.get(url)
         time.sleep(1)
-        for i in range(5):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(3)
         html = driver.page_source
+
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(1)
+            if html == driver.page_source:
+                break
+            html = driver.page_source
+
         driver.quit()
         return html
     except:
