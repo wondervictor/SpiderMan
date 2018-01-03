@@ -285,7 +285,7 @@ class QuestionParser:
             description=question[2],
             follower=question[3],
             views=question[4],
-            comments=question[4],
+            comments=question[5],
             answer_file='question_answers_%s.txt' % question[0]
         )
 
