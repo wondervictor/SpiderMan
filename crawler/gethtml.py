@@ -47,7 +47,7 @@ def get_html(url, keyword=""):
         # # 设置超时时间
         driver.implicitly_wait(20)
         driver.set_page_load_timeout(20)
-        #非问题页面需要登录知乎查看
+        # 非问题页面需要登录知乎查看
         if url.find("question") == -1 :
             driver.get("https://www.zhihu.com")
             driver.delete_all_cookies()
@@ -117,7 +117,7 @@ def get_html(url, keyword=""):
         while True:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(1)
-            if html == driver.page_source:
+            if len(html) == len(driver.page_source):
                 break
             html = driver.page_source
 
@@ -133,4 +133,5 @@ def main():
     # keyword = ""
     # url = "https://www.zhihu.com/question/65483475/answer/261582944"
     page = get_html(url,keyword)
+
 # main()
